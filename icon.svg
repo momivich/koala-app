@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- 背景 -->
+  <rect width="512" height="512" rx="100" fill="#1a3d1a"/>
+  <!-- 葉っぱ背景 -->
+  <ellipse cx="100" cy="80" rx="55" ry="28" fill="#2a6a2a" transform="rotate(-30 100 80)"/>
+  <ellipse cx="412" cy="80" rx="55" ry="28" fill="#2a6a2a" transform="rotate(30 412 80)"/>
+  <ellipse cx="256" cy="440" rx="70" ry="30" fill="#2a6a2a" transform="rotate(0 256 440)"/>
+  <!-- 耳（左） -->
+  <ellipse cx="148" cy="165" rx="62" ry="58" fill="#8b7355"/>
+  <ellipse cx="148" cy="165" rx="40" ry="38" fill="#c4a882"/>
+  <!-- 耳（右） -->
+  <ellipse cx="364" cy="165" rx="62" ry="58" fill="#8b7355"/>
+  <ellipse cx="364" cy="165" rx="40" ry="38" fill="#c4a882"/>
+  <!-- 頭 -->
+  <ellipse cx="256" cy="240" rx="130" ry="118" fill="#9a8468"/>
+  <!-- 顔の明るい部分 -->
+  <ellipse cx="256" cy="262" rx="90" ry="80" fill="#c8ae90"/>
+  <!-- 鼻 -->
+  <ellipse cx="256" cy="258" rx="36" ry="26" fill="#3a2a1a"/>
+  <!-- 目（左） -->
+  <circle cx="200" cy="218" r="18" fill="#2a1a0a"/>
+  <circle cx="207" cy="212" r="6" fill="white"/>
+  <!-- 目（右） -->
+  <circle cx="312" cy="218" r="18" fill="#2a1a0a"/>
+  <circle cx="319" cy="212" r="6" fill="white"/>
+  <!-- ユーカリ -->
+  <line x1="340" y1="310" x2="420" y2="200" stroke="#3a8a3a" stroke-width="8" stroke-linecap="round"/>
+  <ellipse cx="380" cy="248" rx="28" ry="14" fill="#4aaa4a" transform="rotate(-40 380 248)"/>
+  <ellipse cx="408" cy="210" rx="28" ry="14" fill="#3a9a3a" transform="rotate(-50 408 210)"/>
+  <ellipse cx="360" cy="278" rx="24" ry="12" fill="#55bb55" transform="rotate(-30 360 278)"/>
+</svg>

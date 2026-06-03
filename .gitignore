@@ -1,0 +1,12 @@
+# Python
+__pycache__/
+*.pyc
+download-koala-images*.py
+create-koala-folders.*
+
+# PDF（不要）
+koala-images/**/*.pdf
+
+# OS
+.DS_Store
+Thumbs.db
