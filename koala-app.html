@@ -2774,19 +2774,19 @@ document.addEventListener('DOMContentLoaded', function(){
 @keyframes pulse-led{0%,100%{opacity:1;box-shadow:0 0 8px #3ddc6a}50%{opacity:.5;box-shadow:0 0 3px #3ddc6a}}
 </style>
 
-<div id="tab-kioku" class="tab" style="padding:0;background:#050c08;min-height:100%;flex-direction:column;align-items:center;justify-content:flex-start;">
+<div id="tab-kioku" class="tab" style="padding:0;background:#050c08;flex-direction:column;align-items:center;justify-content:flex-start;">
   <canvas id="memory2-c" width="320" height="460"
-    style="display:block;width:100%;max-width:400px;touch-action:none;cursor:pointer;"></canvas>
+    style="display:block;width:100%;max-width:480px;touch-action:none;cursor:pointer;"></canvas>
   <div style="color:#445544;font-size:10px;padding:4px;text-align:center;">コアラが光る順番を覚えてタップ！</div>
 </div>
 
 
-<div id="tab-suika" class="tab" style="padding:0;background:#050c08;min-height:100%;flex-direction:column;align-items:center;justify-content:flex-start;">
-  <div style="width:100%;max-width:360px;padding:0;position:relative;">
+<div id="tab-suika" class="tab" style="padding:0;background:#050c08;flex-direction:column;align-items:center;justify-content:flex-start;">
+  <div style="width:100%;max-width:480px;padding:0;position:relative;">
     <canvas id="suika-c" width="320" height="480"
-      style="display:block;width:100%;max-width:360px;image-rendering:pixelated;touch-action:none;cursor:crosshair;background:#050c08;"></canvas>
+      style="display:block;width:100%;touch-action:none;cursor:crosshair;background:#050c08;"></canvas>
   </div>
-  <div style="color:#556655;font-size:10px;padding:6px;text-align:center;">
+  <div style="color:#556655;font-size:10px;padding:4px 6px;text-align:center;">
     クリック/タップで落とす ・ 同じコアラは合体！
   </div>
 </div>
