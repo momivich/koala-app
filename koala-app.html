@@ -182,12 +182,12 @@ nav button.active{color:white;background:rgba(255,255,255,0.2);border-bottom:3px
 .mtt-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.6rem;padding:0.4rem 0.7rem;background:#e8f4d9;border-radius:8px}
 .mtt-hdr span{font-size:0.82rem;font-weight:700;color:#2d5a1b}
 .mtt-hand{display:flex;gap:5px;justify-content:center;margin:0.5rem 0}
-.mtt-card{width:60px;min-height:92px;background:white;border:2px solid #b8d89a;border-radius:10px;padding:5px 3px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;transition:all 0.18s;position:relative;text-align:center;user-select:none}
+.mtt-card{width:72px;min-height:108px;background:white;border:2px solid #b8d89a;border-radius:10px;padding:5px 3px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;transition:all 0.18s;position:relative;text-align:center;user-select:none}
 .mtt-card:hover:not(.done){border-color:#4a7c2f;transform:translateY(-2px)}
 .mtt-card.sel{background:#fde8e8;border-color:#e57373;opacity:0.72;transform:translateY(3px)}
 .mtt-sel-x{position:absolute;top:2px;right:5px;font-size:0.72rem;font-weight:700;color:#c62828;line-height:1}
-.mtt-card-face{width:46px;height:46px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.mtt-card-face img,.mtt-card-face svg{width:46px;height:46px;border-radius:50%;object-fit:cover}
+.mtt-card-face{width:56px;height:56px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.mtt-card-face img,.mtt-card-face svg{width:56px;height:56px;border-radius:50%;object-fit:cover}
 .mtt-card-name{font-size:0.68rem;font-weight:700;color:#2d5a1b;line-height:1.1;max-width:56px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .mtt-card-zoo{font-size:0.6rem;color:#555;max-width:56px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:#f0f7e8;border-radius:3px;padding:1px 3px;margin-top:1px}
 .mtt-card-info{font-size:0.58rem;color:#999;margin-top:1px}
@@ -2525,6 +2525,7 @@ function decideMattari(){
   renderMttHand();
   const box=document.getElementById('mtt-yaku-box');
   box.style.display='block';
+  setTimeout(()=>box.scrollIntoView({behavior:'smooth',block:'nearest'}),50);
   document.getElementById('mtt-yaku-name').textContent=res.icon+' '+res.name;
   document.getElementById('mtt-yaku-pts').textContent='+'+res.pts+'点';
   document.getElementById('mtt-yaku-msg').textContent=res.msg;
@@ -2560,16 +2561,16 @@ function evalMttHand(hand){
   });
   const hasPC=pcPairs.length>0;
   const relation=pcPairs.map(p=>p.parent.name+'（親）→ '+p.child.name+'（子）').join('　');
-  if(hasPC&&zv[0]===5) return {name:'コアラ一家',pts:100,icon:'\U0001F46A',msg:'親子全員が同じ園！最高役！',relation};
-  if(zv[0]===5)        return {name:'ごきょうだい',pts:80,icon:'\U0001F3E0',msg:'同じ園のコアラが5頭！すごい！'};
-  if(hasPC)            return {name:'親子コアラ',pts:60,icon:'\U0001F428❤',msg:'手札に親子がいた！',relation};
-  if(zv[0]===4)        return {name:'よんきょうだい',pts:50,icon:'\U0001F33F',msg:'同じ園が4頭！'};
-  if(zv[0]===3&&zv[1]===2) return {name:'フルコロニー',pts:40,icon:'\U0001F333',msg:'3頭+2頭のフルハウス！'};
+  if(hasPC&&zv[0]===5) return {name:'コアラ一家',pts:100,icon:'👨‍👩‍👧',msg:'親子全員が同じ園！最高役！',relation};
+  if(zv[0]===5)        return {name:'ごきょうだい',pts:80,icon:'🏠',msg:'同じ園のコアラが5頭！すごい！'};
+  if(hasPC)            return {name:'親子コアラ',pts:60,icon:'🐨❤️',msg:'手札に親子がいた！',relation};
+  if(zv[0]===4)        return {name:'よんきょうだい',pts:50,icon:'🌿',msg:'同じ園が4頭！'};
+  if(zv[0]===3&&zv[1]===2) return {name:'フルコロニー',pts:40,icon:'🌳',msg:'3頭+2頭のフルハウス！'};
   if(sameG)            return {name:'せいべつそろい',pts:35,icon:'♂♀',msg:'全員同じ性別！'};
-  if(zv[0]===3)        return {name:'さんきょうだい',pts:25,icon:'\U0001F343',msg:'同じ園が3頭！'};
-  if(zv[0]===2&&zv[1]===2) return {name:'ふたペア',pts:15,icon:'\U0001F340',msg:'2組のペアが揃った！'};
-  if(zv[0]===2)        return {name:'ワンペア',pts:8,icon:'\U0001F331',msg:'ペアが1組！'};
-  return {name:'ハイコアラ',pts:2,icon:'\U0001F43E',msg:'惜しい…次こそ役を狙おう！'};
+  if(zv[0]===3)        return {name:'さんきょうだい',pts:25,icon:'🍃',msg:'同じ園が3頭！'};
+  if(zv[0]===2&&zv[1]===2) return {name:'ふたペア',pts:15,icon:'🍀',msg:'2組のペアが揃った！'};
+  if(zv[0]===2)        return {name:'ワンペア',pts:8,icon:'🌱',msg:'ペアが1組！'};
+  return {name:'ハイコアラ',pts:2,icon:'🐾',msg:'惜しい…次こそ役を狙おう！'};
 }
 
 function nextMattariRound(){
@@ -4186,7 +4187,7 @@ function update(dt){
   sparks=sparks.filter(p=>p.life>0);
   if(bonusText){bonusText.y-=.3;bonusText.life--;if(bonusText.life<=0)bonusText=null;}
   // Game over: circle above danger line for a while
-  if(circles.some(c=>c.y-c.r<DROP_LINE+4&&c.life>90))gameOver=true;
+  if(circles.some(c=>c.y<DROP_LINE&&c.life>180))gameOver=true;
 }
 
 function drop(){
