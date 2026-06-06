@@ -1758,9 +1758,13 @@ function showFin(){
 }
 
 function showTab(name,btn){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  // 明示的にdisplay:noneを設定（inline display:flexを持つタブもCSSクラスだけでは非表示にできないため）
+  document.querySelectorAll('.tab').forEach(t=>{ t.classList.remove('active'); t.style.display='none'; });
   document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
-  document.getElementById('tab-'+name).classList.add('active');
+  const tab=document.getElementById('tab-'+name);
+  tab.classList.add('active');
+  // canvas系タブはdisplay:flex、通常タブはdisplay:block
+  tab.style.display=(name==='suika'||name==='kioku')?'flex':'block';
   btn.classList.add('active');
   if(name!=='suika'&&window.stopSuikaGame) stopSuikaGame();
   if(name!=='kioku'&&window.stopMemoryGame) stopMemoryGame();
@@ -2770,14 +2774,14 @@ document.addEventListener('DOMContentLoaded', function(){
 @keyframes pulse-led{0%,100%{opacity:1;box-shadow:0 0 8px #3ddc6a}50%{opacity:.5;box-shadow:0 0 3px #3ddc6a}}
 </style>
 
-<div id="tab-kioku" class="tab" style="padding:0;background:#050c08;min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;">
+<div id="tab-kioku" class="tab" style="padding:0;background:#050c08;min-height:100%;flex-direction:column;align-items:center;justify-content:flex-start;">
   <canvas id="memory2-c" width="320" height="460"
     style="display:block;width:100%;max-width:400px;touch-action:none;cursor:pointer;"></canvas>
   <div style="color:#445544;font-size:10px;padding:4px;text-align:center;">コアラが光る順番を覚えてタップ！</div>
 </div>
 
 
-<div id="tab-suika" class="tab" style="padding:0;background:#050c08;min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;">
+<div id="tab-suika" class="tab" style="padding:0;background:#050c08;min-height:100%;flex-direction:column;align-items:center;justify-content:flex-start;">
   <div style="width:100%;max-width:360px;padding:0;position:relative;">
     <canvas id="suika-c" width="320" height="480"
       style="display:block;width:100%;max-width:360px;image-rendering:pixelated;touch-action:none;cursor:crosshair;background:#050c08;"></canvas>
@@ -3625,7 +3629,6 @@ function loop(ts){
   ctx.clearRect(0,0,GW,GH);
   drawBg();drawGround();
 
-  if(state==='scene-end'){state='scene-sel';return;}
   if(state==='scene-sel'){
     drawSceneSel();
   } else if(state==='scene-pre'){
@@ -4085,11 +4088,14 @@ function draw(){
   cx2.font='9px sans-serif';cx2.fillStyle='#88bb88';
   cx2.fillText('BEST '+hiScore,8,35);
 
-  // Next
+  // Next（HUD内に収まるようスケール調整）
   cx2.font='8px sans-serif';cx2.fillStyle='#aaddaa';cx2.textAlign='right';
   cx2.fillText('NEXT',SW-8,14);
   const nr=TYPES[nextType].r;
-  drawCirc({x:0,y:0,r:nr,type:nextType},SW-8-nr,26+nr);
+  const maxNr=13, sc=Math.min(1,maxNr/nr), dnr=nr*sc;
+  cx2.save(); cx2.translate(SW-8-maxNr,(DROP_LINE-2)/2); cx2.scale(sc,sc);
+  drawCirc({x:0,y:0,r:nr,type:nextType},0,0);
+  cx2.restore();
 
   // Game over
   if(gameOver){
@@ -4314,6 +4320,22 @@ let mc,mcx,seq=[],step=0,state='idle',round=0,hiRound=0;
 let activeCell=-1,wrongCell=-1;
 let _rafM=null,_ltM=0,audioCtx=null;
 let showIdx=0;
+let ranks=[]; // [{round,date}] TOP5
+
+const RANK_KEY='koala-memory-ranks';
+function loadRanks(){
+  try{const d=JSON.parse(localStorage.getItem(RANK_KEY)||'[]');ranks=Array.isArray(d)?d:[];}catch(e){ranks=[];}
+  hiRound=ranks.length>0?ranks[0].round:0;
+}
+function saveRank(r){
+  const now=new Date();
+  const label=`${now.getMonth()+1}/${now.getDate()}`;
+  ranks.push({round:r,date:label});
+  ranks.sort((a,b)=>b.round-a.round);
+  ranks=ranks.slice(0,5);
+  hiRound=ranks[0].round;
+  try{localStorage.setItem(RANK_KEY,JSON.stringify(ranks));}catch(e){}
+}
 
 function getAC(){
   if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
@@ -4361,14 +4383,13 @@ function cellTap(idx){
   if(idx===seq[step]){
     step++;
     if(step>=seq.length){
-      if(round>hiRound)hiRound=round;
       state='correct';
       setTimeout(sfxSuccess,80);
       setTimeout(startRound,1100);
     }
   } else {
     wrongCell=idx;sfxFail();
-    if(round>hiRound)hiRound=round;
+    saveRank(round);
     state='fail';
   }
 }
@@ -4501,9 +4522,25 @@ function draw(){
     mcx.font='12px "Hiragino Kaku Gothic ProN",sans-serif';
     mcx.fillStyle='rgba(140,200,140,0.7)';
     mcx.fillText('光る順番を覚えてタップしよう！',MW/2,sy);
-    if(hiRound>0){
-      mcx.font='10px sans-serif';mcx.fillStyle='#ffe066';
-      mcx.fillText('最高記録: '+hiRound+' ラウンド',MW/2,sy+20);
+    // ランキング表示
+    if(ranks.length>0){
+      const rx=MW/2-72, rw=144, ry=sy+14, rh=18*ranks.length+10;
+      mcx.fillStyle='rgba(0,20,0,0.6)';
+      mcx.beginPath();rrect(rx,ry,rw,rh,7);mcx.fill();
+      mcx.font='bold 9px sans-serif';mcx.fillStyle='#ffe066';mcx.textAlign='center';
+      mcx.fillText('🏆 TOP '+ranks.length,MW/2,ry+10);
+      ranks.forEach((e,i)=>{
+        const medals=['🥇','🥈','🥉','4️⃣','5️⃣'];
+        const ey=ry+22+i*18;
+        mcx.font='10px "Hiragino Kaku Gothic ProN",sans-serif';
+        mcx.fillStyle=i===0?'#ffd700':i===1?'#c0c0c0':i===2?'#cd7f32':'#99bb99';
+        mcx.textAlign='left'; mcx.fillText(medals[i]+' '+e.round+'ラウンド',rx+8,ey);
+        mcx.fillStyle='rgba(140,180,140,0.6)';mcx.textAlign='right';
+        mcx.fillText(e.date,rx+rw-8,ey);
+      });
+    } else {
+      mcx.font='10px sans-serif';mcx.fillStyle='rgba(120,180,120,0.5)';
+      mcx.fillText('記録なし　挑戦しよう！',MW/2,sy+22);
     }
   } else if(state==='show'){
     mcx.font='13px "Hiragino Kaku Gothic ProN",sans-serif';
@@ -4525,9 +4562,17 @@ function draw(){
   } else if(state==='fail'){
     mcx.font='bold 15px "Hiragino Kaku Gothic ProN",sans-serif';
     mcx.fillStyle='#ff6644';mcx.fillText('ミス！ ラウンド '+round+' まで到達',MW/2,sy);
-    mcx.font='11px "Hiragino Kaku Gothic ProN",sans-serif';
-    mcx.fillStyle='#aaddaa';mcx.fillText('タップでもう一度',MW/2,sy+24);
-    mcx.fillStyle='#ffe066';mcx.fillText('🏆 最高 '+hiRound+' ラウンド',MW/2,sy+44);
+    // 新記録バッジ
+    if(ranks.length>0&&ranks[0].round===round&&ranks.filter(e=>e.round===round).length===1){
+      mcx.font='bold 13px "Hiragino Kaku Gothic ProN",sans-serif';
+      mcx.fillStyle='#ffd700';mcx.fillText('★ 新記録！',MW/2,sy+22);
+      mcx.font='11px "Hiragino Kaku Gothic ProN",sans-serif';
+      mcx.fillStyle='#aaddaa';mcx.fillText('タップでもう一度',MW/2,sy+42);
+    } else {
+      mcx.font='11px "Hiragino Kaku Gothic ProN",sans-serif';
+      mcx.fillStyle='#aaddaa';mcx.fillText('タップでもう一度',MW/2,sy+24);
+      mcx.fillStyle='#ffe066';mcx.fillText('🏆 最高 '+hiRound+' ラウンド',MW/2,sy+44);
+    }
   }
 }
 
@@ -4562,7 +4607,7 @@ function setupM(){
 
 window.startMemoryGame=function(){
   if(_rafM!==null)return;
-  setupM();pickCells();state='idle';activeCell=-1;wrongCell=-1;
+  setupM();loadRanks();pickCells();state='idle';activeCell=-1;wrongCell=-1;
   _ltM=performance.now();_rafM=requestAnimationFrame(loopM);
 };
 window.stopMemoryGame=function(){
