@@ -208,6 +208,18 @@ nav button.active{color:white;background:rgba(255,255,255,0.2);border-bottom:3px
 .mtt-yaku-tbl td{padding:3px 4px;vertical-align:middle}
 .mtt-yaku-tbl .pts{text-align:right;font-weight:700;color:#e65100;white-space:nowrap}
 .mtt-yaku-tbl .desc{color:#888;font-size:0.67rem}
+/* ── おやすみリレー ── */
+.oyr-card{width:62px;height:88px;border-radius:8px;border:2px solid rgba(255,255,255,0.35);position:relative;display:inline-flex;flex-direction:column;justify-content:center;align-items:center;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,0.2);cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
+.oyr-back{background:linear-gradient(135deg,#2d5a1b,#4a7c2f);color:white;font-size:1.4rem}
+.oyr-sm{width:30px;height:42px;font-size:0.75rem;border-radius:5px}
+.oyr-c-img{width:40px;height:40px;border-radius:5px;object-fit:cover;pointer-events:none}
+.oyr-c-tl{position:absolute;top:2px;left:3px;font-size:0.82rem;line-height:1}
+.oyr-c-tr{position:absolute;top:2px;right:3px;font-size:0.82rem;line-height:1}
+.oyr-c-bl{position:absolute;bottom:2px;left:2px;color:rgba(255,255,255,0.9);font-size:0.48rem;font-weight:700;line-height:1}
+.oyr-c-br{position:absolute;bottom:2px;right:2px;color:rgba(255,255,255,0.9);font-size:0.48rem;font-weight:700;line-height:1;text-align:right}
+.oyr-c-se{font-size:1.6rem;line-height:1}
+.oyr-c-sn{font-size:0.52rem;color:rgba(255,255,255,0.95);font-weight:700;margin-top:2px;text-align:center}
+.oyr-c-simg{width:32px;height:32px;border-radius:50%;object-fit:cover;margin-top:2px}
 /* ── のんびりブラックジャック ── */
 .bj-card{width:70px;height:100px;background:white;border:1.5px solid #b8d89a;border-radius:8px;display:flex;flex-direction:column;justify-content:space-between;padding:3px 4px;box-shadow:0 2px 5px rgba(0,0,0,0.1);flex-shrink:0;position:relative}
 .bj-card-tl{font-size:0.72rem;font-weight:700;color:#2d5a1b;line-height:1}
@@ -277,6 +289,7 @@ nav button.active{color:white;background:rgba(255,255,255,0.2);border-bottom:3px
   <button onclick="showTab('uta',this)">🎵 うた</button>
   <button onclick="showTab('bj',this)">💤 BJ</button>
   <button onclick="showTab('forest',this);if(window.initForestGame)initForestGame()">🌳 もり</button>
+  <button onclick="showTab('oyr',this);if(window.initOyrGame)initOyrGame()">🃏 リレー</button>
 </nav>
 
 <div id="tab-tree" class="tab active">
@@ -1816,6 +1829,7 @@ function showTab(name,btn){
   tab.style.display=(name==='suika'||name==='kioku')?'flex':'block';
   if(name==='uta'&&window.initUtaGame) initUtaGame();
   if(name==='bj'&&window.initBjGame) initBjGame();
+  if(name==='oyr'&&window.initOyrGame) initOyrGame();
   btn.classList.add('active');
   if(name!=='suika'&&window.stopSuikaGame) stopSuikaGame();
   if(name!=='kioku'&&window.stopMemoryGame) stopMemoryGame();
@@ -2833,6 +2847,10 @@ document.addEventListener('DOMContentLoaded', function(){
 </div>
 
 
+<div id="tab-oyr" class="tab" style="padding:0.5rem;background:#f5fbee;min-height:100%">
+  <div id="oyr-game" style="max-width:440px;margin:0 auto"></div>
+</div>
+
 <div id="tab-bj" class="tab" style="padding:0.5rem;background:#f0fbe8;min-height:100%">
   <div id="bj-game" style="max-width:440px;margin:0 auto"></div>
 </div>
@@ -3120,6 +3138,272 @@ function loadState(){
       type:t.type,stage:t.stage,gTimer:t.gTimer||0,koalas:[],
     }));
   }catch(e){pts=10;}
+}
+
+})();
+</script>
+
+<!-- ===== おやすみリレー ===== -->
+<script>
+(function(){
+'use strict';
+
+// ── 定数 ──────────────────────────────────────────────
+const LOCS=[
+  {n:'木の上',   e:'🌳', bg:'#3a6a20'},
+  {n:'地面',     e:'🌿', bg:'#5a8a35'},
+  {n:'岩の上',   e:'🪨', bg:'#667788'},
+  {n:'水辺',     e:'💧', bg:'#3377aa'},
+  {n:'ユーカリ', e:'🌲', bg:'#2a5a18'},
+];
+const STATS=[
+  {n:'居眠り中', e:'😴'},
+  {n:'空腹',     e:'🍃'},
+  {n:'遊びたい', e:'🎮'},
+  {n:'ウトウト', e:'🌙'},
+];
+const SPEC=[
+  {id:'draw2',   n:'+2',    e:'🍃', bg:'#b06010', desc:'次の人が2枚引く！'},
+  {id:'reverse', n:'逆転',  e:'⏰', bg:'#6633aa', desc:'順番が逆転！'},
+  {id:'skip',    n:'スキップ',e:'💤',bg:'#bb3333', desc:'次の人をスキップ！'},
+];
+const PC=3; // プレイヤー数（人間1+CPU2）
+
+// ── KKプール ─────────────────────────────────────────
+let _kp=[];
+if(typeof KK!=='undefined') _kp=[...KK].filter(k=>k.img).sort(()=>Math.random()-.5);
+let _ki=0;
+function nextK(){return _kp.length?_kp[(_ki++)%_kp.length]:null;}
+
+// ── デッキ ────────────────────────────────────────────
+function buildDeck(){
+  const d=[];
+  LOCS.forEach((_,li)=>STATS.forEach((_,si)=>{
+    for(let i=0;i<2;i++) d.push({type:'n',loc:li,stat:si,k:nextK()});
+  }));
+  SPEC.forEach((sp,si)=>{
+    for(let i=0;i<4;i++) d.push({type:'s',sp:si,k:nextK()});
+  });
+  return shuf(d);
+}
+function shuf(a){a=[...a];for(let i=a.length-1;i>0;i--){const j=0|Math.random()*(i+1);[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+// ── 状態 ──────────────────────────────────────────────
+let deck=[],pile=[],hands=[],dir=1,cur=0,phase='start',drawQ=0,oyrInited=false;
+
+function canPlay(c,top){
+  if(c.type==='s') return true;
+  if(!top||top.type==='s') return true;
+  return c.loc===top.loc||c.stat===top.stat;
+}
+
+function initOyrGame(){
+  if(oyrInited){return;}
+  oyrInited=true;
+  renderStart();
+}
+window.initOyrGame=initOyrGame;
+
+function startGame(){
+  deck=buildDeck();
+  hands=Array.from({length:PC},()=>[]);
+  for(let i=0;i<7;i++) hands.forEach(h=>h.push(deck.pop()));
+  do{pile=[deck.pop()];}while(pile[0].type==='s'&&deck.length>0);
+  dir=1; cur=0; drawQ=0; phase='play';
+  render();
+  if(cur!==0) setTimeout(cpuGo,1000);
+}
+window.startOyr=startGame;
+
+function playCard(idx){
+  if(phase!=='play'||cur!==0) return;
+  const c=hands[0][idx], top=pile[pile.length-1];
+  if(!canPlay(c,top)){oyrMsg('出せない！場所か状態を合わせよう');return;}
+  hands[0].splice(idx,1);
+  doPlay(c,0);
+}
+window.oyrPlay=playCard;
+
+function drawCard(){
+  if(phase!=='play'||cur!==0) return;
+  refill();
+  const n=Math.max(1,drawQ);
+  for(let i=0;i<n&&deck.length;i++) hands[0].push(deck.pop());
+  drawQ=0;
+  nextP(); render();
+  if(cur!==0) setTimeout(cpuGo,900);
+}
+window.oyrDraw=drawCard;
+
+function doPlay(c,p){
+  pile.push(c);
+  let skipExtra=false;
+  if(c.type==='s'){
+    const sp=SPEC[c.sp];
+    oyrMsg(sp.desc);
+    if(sp.id==='draw2') drawQ+=2;
+    else if(sp.id==='reverse'){dir*=-1;}
+    else if(sp.id==='skip') skipExtra=true;
+  } else { drawQ=0; }
+  if(hands[p].length===0){phase='fin';renderFin(p);return;}
+  nextP();
+  if(skipExtra) nextP();
+  render();
+  if(cur!==0) setTimeout(cpuGo,900);
+}
+
+function nextP(){cur=(cur+dir+PC)%PC;}
+
+function refill(){
+  if(deck.length<5){deck=[...deck,...shuf(pile.slice(0,-1))];pile=[pile[pile.length-1]];}
+}
+
+function cpuGo(){
+  if(phase!=='play'||cur===0) return;
+  const hand=hands[cur], top=pile[pile.length-1];
+  const idx=hand.findIndex(c=>canPlay(c,top));
+  if(idx>=0){
+    const c=hand.splice(idx,1)[0];
+    doPlay(c,cur);
+  } else {
+    refill();
+    const n=Math.max(1,drawQ);
+    for(let i=0;i<n&&deck.length;i++) hand.push(deck.pop());
+    drawQ=0; nextP(); render();
+    if(cur!==0) setTimeout(cpuGo,900);
+  }
+}
+
+// ── カードHTML ────────────────────────────────────────
+function cardHTML(c,idx,clickable,sm){
+  const cl=clickable?`onclick="oyrPlay(${idx})"`:'' ;
+  const szCls=sm?'oyr-sm':'';
+  if(c.type==='s'){
+    const sp=SPEC[c.sp];
+    return `<div class="oyr-card ${szCls}" style="background:${sp.bg}" ${cl}>
+      <div class="oyr-c-se">${sp.e}</div>
+      ${!sm?`<div class="oyr-c-sn">${sp.n}</div>
+      ${c.k?`<img src="./${c.k.img}" class="oyr-c-simg" onerror="this.style.display='none'">`:''}`:'' }
+    </div>`;
+  }
+  const l=LOCS[c.loc],s=STATS[c.stat];
+  return `<div class="oyr-card ${szCls}" style="background:${l.bg}" ${cl}>
+    ${!sm?`<div class="oyr-c-tl">${l.e}</div>
+    <div class="oyr-c-tr">${s.e}</div>
+    ${c.k?`<img src="./${c.k.img}" class="oyr-c-img" onerror="this.style.display='none'">`:''}
+    <div class="oyr-c-bl">${l.n}</div>
+    <div class="oyr-c-br">${s.n}</div>`
+    :`<div style="font-size:0.7rem">${l.e}${s.e}</div>`}
+  </div>`;
+}
+
+// ── レンダー ──────────────────────────────────────────
+function el(){return document.getElementById('oyr-game');}
+
+function renderStart(){
+  const e=el(); if(!e) return;
+  e.innerHTML=`
+<div style="text-align:center;padding:1.5rem 0.8rem">
+  <div style="font-size:2.5rem">🐨🃏</div>
+  <div style="font-size:1.2rem;font-weight:700;color:#2d5a1b;margin:0.4rem 0">おやすみリレー</div>
+  <div style="font-size:0.88rem;color:#555;line-height:1.7;margin:0.6rem 0">
+    場のカードと<b>「場所」か「状態」</b>が一致するカードを出そう！<br>出せない時は山札から1枚引く。<br>手札を<b>ゼロ</b>にした人が勝ち！
+  </div>
+  <div style="background:#e8f5e0;border-radius:10px;padding:0.6rem;font-size:0.78rem;color:#2d5a1b;margin:0.6rem 0;text-align:left">
+    🍃 <b>ユーカリ+2</b> … 次の人が2枚引く<br>
+    ⏰ <b>お目覚め</b> … 順番が逆転<br>
+    💤 <b>おひるね</b> … 次の人をスキップ<br>
+    ※ 特殊カードはいつでも出せる！
+  </div>
+  <button onclick="startOyr()" class="bj-btn-main">🌙 ゲームスタート</button>
+</div>`;
+}
+
+function render(){
+  const e=el(); if(!e) return;
+  const top=pile[pile.length-1];
+  const myHand=hands[0];
+  const isMy=cur===0&&phase==='play';
+
+  e.innerHTML=`
+<div style="padding:0.4rem 0.3rem">
+  <!-- CPU手札 -->
+  <div style="display:flex;justify-content:space-around;margin-bottom:0.4rem">
+    ${[1,2].map(p=>`<div style="text-align:center;opacity:${cur===p?1:0.55};transition:opacity 0.3s">
+      <div style="font-size:0.68rem;color:${cur===p?'#e67e22':'#888'};font-weight:${cur===p?700:400};margin-bottom:2px">
+        CPU${p}${cur===p?' ▶':''}（${hands[p].length}枚）
+      </div>
+      <div style="display:flex;gap:2px;justify-content:center;flex-wrap:wrap;max-width:120px;margin:0 auto">
+        ${hands[p].slice(0,8).map(()=>`<div class="oyr-card oyr-back oyr-sm">🐨</div>`).join('')}
+        ${hands[p].length>8?`<span style="font-size:0.6rem;color:#888;align-self:center">+${hands[p].length-8}</span>`:''}
+      </div>
+    </div>`).join('')}
+  </div>
+
+  <!-- 場 -->
+  <div style="display:flex;align-items:center;justify-content:center;gap:1.2rem;padding:0.5rem 0.8rem;background:rgba(74,124,47,0.12);border-radius:12px;margin:0.4rem 0">
+    <div style="text-align:center">
+      <div style="font-size:0.62rem;color:#888;margin-bottom:3px">山札 ${deck.length}枚</div>
+      <div class="oyr-card oyr-back" onclick="oyrDraw()" style="cursor:${isMy?'pointer':'default'}">🐨</div>
+    </div>
+    <div style="font-size:1.3rem;color:#4a7c2f">→</div>
+    <div style="text-align:center">
+      <div style="font-size:0.62rem;color:#888;margin-bottom:3px">場のカード</div>
+      ${cardHTML(top,-1,false,false)}
+    </div>
+  </div>
+
+  ${drawQ>0?`<div style="text-align:center;font-size:0.78rem;color:#c0392b;font-weight:700;margin:0.2rem 0">⚠️ +${drawQ}枚ペナルティ！出すか引こう</div>`:''}
+
+  <!-- 自分の手札 -->
+  <div style="margin-top:0.4rem">
+    <div style="font-size:0.7rem;text-align:center;margin-bottom:0.3rem;color:${isMy?'#e67e22':'#888'};font-weight:${isMy?700:400}">
+      👤 あなた（${myHand.length}枚）${isMy?' ▶ 出せるカードをタップ！':''}
+    </div>
+    <div style="display:flex;gap:5px;overflow-x:auto;padding:0 2px 6px;-webkit-overflow-scrolling:touch">
+      ${myHand.map((c,i)=>{
+        const ok=isMy&&canPlay(c,top);
+        return `<div style="flex-shrink:0;opacity:${ok?1:0.4};transform:${ok?'translateY(-5px)':'none'};transition:all 0.15s">
+          ${cardHTML(c,i,ok,false)}
+        </div>`;
+      }).join('')}
+    </div>
+    ${isMy?`<div style="text-align:center;margin-top:0.3rem">
+      <button onclick="oyrDraw()" class="bj-btn" style="font-size:0.75rem;padding:0.38rem 0.9rem">
+        引く（${Math.max(1,drawQ)}枚）
+      </button>
+    </div>`:''}
+  </div>
+</div>`;
+}
+
+function renderFin(winner){
+  const e=el(); if(!e) return;
+  const win=winner===0;
+  e.innerHTML=`
+<div style="text-align:center;padding:1.5rem 1rem">
+  <div style="font-size:3rem">${win?'🎉':'😴'}</div>
+  <div style="font-size:1.3rem;font-weight:700;color:${win?'#2d5a1b':'#c0392b'};margin:0.4rem 0">
+    ${win?'おやすみリレー達成！':'CPU'+winner+'が上がった…'}
+  </div>
+  <div style="font-size:0.85rem;color:#555;margin:0.3rem 0">
+    ${win?'全員にお休みを届けた！🐨✨':'次こそコアラたちを眠らせよう！'}
+  </div>
+  <button onclick="startOyr()" class="bj-btn-main" style="margin-top:0.8rem">🌙 もう一度</button>
+</div>`;
+}
+
+let _msgT=null;
+function oyrMsg(m){
+  let box=document.getElementById('oyr-toast');
+  if(!box){
+    box=document.createElement('div');
+    box.id='oyr-toast';
+    box.style.cssText='position:fixed;top:18%;left:50%;transform:translateX(-50%);background:rgba(45,90,27,0.92);color:white;padding:8px 20px;border-radius:22px;font-size:0.88rem;font-weight:700;z-index:9999;pointer-events:none;transition:opacity 0.4s;white-space:nowrap';
+    document.body.appendChild(box);
+  }
+  box.textContent=m; box.style.opacity='1';
+  clearTimeout(_msgT); _msgT=setTimeout(()=>box.style.opacity='0',1800);
 }
 
 })();
