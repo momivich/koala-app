@@ -2863,6 +2863,7 @@ document.addEventListener('DOMContentLoaded', function(){
         style="display:block;width:100%;border-radius:10px;border:2px solid #4a7c2f;cursor:pointer;touch-action:manipulation"></canvas>
       <div id="forest-msg" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(45,90,27,0.88);color:white;padding:6px 14px;border-radius:20px;font-size:0.85rem;pointer-events:none;opacity:0;transition:opacity 0.4s;white-space:nowrap"></div>
     </div>
+    <div id="forest-hand" style="margin:0.3rem 0;min-height:70px"></div>
     <div id="forest-log" style="font-size:0.7rem;color:#555;text-align:center;min-height:1.2rem;margin-top:0.2rem"></div>
   </div>
 </div>
@@ -2933,33 +2934,46 @@ document.addEventListener('DOMContentLoaded', function(){
 (function(){
 'use strict';
 
-const COLS=6, ROWS=6, TILE=44;
-const CW=COLS*TILE, CH=ROWS*TILE;
+const COLS=6,ROWS=6,TILE=44;
+const CW=COLS*TILE,CH=ROWS*TILE;
 
-// 木の種類
-const TREES=[
-  {name:'ユーカリ苗',  emoji:'🌱', cost:0,   ppm:1,  maxK:2, growMs:15000, col:'#6ab84a'},
-  {name:'ユーカリ',    emoji:'🌳', cost:20,  ppm:3,  maxK:3, growMs:30000, col:'#4a9830'},
-  {name:'古ユーカリ',  emoji:'🌲', cost:80,  ppm:8,  maxK:5, growMs:60000, col:'#2d7820'},
-  {name:'レアユーカリ',emoji:'🌴', cost:300, ppm:20, maxK:8, growMs:90000, col:'#1a5810'},
+// 施設定義
+const FAC=[
+  {id:0,name:'ベッド',       emoji:'🛏', cost:0,    ppm:2,  maxK:4, growMs:10000},
+  {id:1,name:'ユーカリの森',  emoji:'🌳', cost:100,  ppm:5,  maxK:6, growMs:20000},
+  {id:2,name:'アスレチック',  emoji:'🏋', cost:500,  ppm:12, maxK:5, growMs:30000},
+  {id:3,name:'コアラ楽園',   emoji:'🌴', cost:2000, ppm:30, maxK:8, growMs:60000},
+];
+
+// コアラレアリティ（per-facility multiplier: ベッド/森/アスレチック/楽園）
+const RARITY=[
+  {name:'普通',    col:'#888888', pct:40, multi:[1.0,1.0,1.0,1.0]},
+  {name:'珍しい',  col:'#44bb44', pct:35, multi:[1.5,1.2,1.0,1.0]},
+  {name:'活発',    col:'#ffaa00', pct:15, multi:[1.0,1.5,2.5,1.5]},
+  {name:'レア',    col:'#ff6600', pct:8,  multi:[2.0,2.0,2.0,2.5]},
+  {name:'伝説',    col:'#cc00ff', pct:2,  multi:[3.0,3.0,3.0,5.0]},
 ];
 
 // コアラ画像プール
-let kImgs=[];
+let kPool=[];
 if(typeof KK!=='undefined'){
-  const pool=KK.filter(k=>k.img);
-  const picks=pool.sort(()=>Math.random()-0.5).slice(0,24);
-  kImgs=picks.map(k=>{const i=new Image();i.src='./'+k.img;i._n=k.name;return i;});
+  kPool=KK.filter(k=>k.img).map(k=>{
+    const i=new Image();i.src='./'+k.img;i._n=k.name;return i;
+  });
 }
 
 // 状態
-let cv,cx,trees=[],walkers=[],pts=10,tick=0,selType=0,inited=false;
+let cv,cx,tiles=[],walkers=[],pts=10,tick=0,inited=false;
+let facUnlocked=[true,false,false,false];
+let hand=[];        // {rarityIdx, img, name}
+let selectedCard=null;
+let selFacType=0;
 let lastTs=0;
 
 function initForestGame(){
-  if(inited) return; inited=true;
+  if(inited)return;inited=true;
   cv=document.getElementById('forest-c');
-  if(!cv) return;
+  if(!cv)return;
   cx=cv.getContext('2d');
   loadState();
   cv.addEventListener('click',onTap);
@@ -2976,123 +2990,176 @@ function initForestGame(){
 }
 window.initForestGame=initForestGame;
 
+// ガチャ（30pt）
+function doGacha(){
+  if(pts<30){showLog('30ptが必要！');return;}
+  if(hand.length>=10){showLog('手札が満杯（最大10匹）');return;}
+  pts-=30;
+  const roll=Math.random()*100;
+  let cumul=0,ri=0;
+  for(let i=0;i<RARITY.length;i++){cumul+=RARITY[i].pct;if(roll<cumul){ri=i;break;}}
+  let img=null,name='コアラ';
+  if(kPool.length){const p=kPool[0|Math.random()*kPool.length];img=p;name=p._n;}
+  hand.push({rarityIdx:ri,img,name});
+  showLog('✨ '+RARITY[ri].name+'「'+name+'」をゲット！');
+  renderHUD();
+}
+window.doGacha=doGacha;
+
+function selectHandCard(i){
+  selectedCard=(selectedCard===i)?null:i;
+  renderHUD();
+}
+window.selectHandCard=selectHandCard;
+
+function unlockFac(i){
+  if(facUnlocked[i])return;
+  if(pts<FAC[i].cost){showLog(FAC[i].cost+'ptが必要！');return;}
+  pts-=FAC[i].cost;
+  facUnlocked[i]=true;
+  showLog('🎉 '+FAC[i].emoji+FAC[i].name+'を解放！');
+  renderHUD();
+}
+window.unlockFac=unlockFac;
+
+function selectFacType(i){
+  if(!facUnlocked[i]){showLog('先に'+FAC[i].name+'を解放してください');return;}
+  selFacType=i;renderHUD();
+}
+window.selectFacType=selectFacType;
+
 function onTap(e){
   const r=e._r||cv.getBoundingClientRect();
-  const sx=cv.width/r.width, sy=cv.height/r.height;
+  const sx=cv.width/r.width,sy=cv.height/r.height;
   const col=Math.floor((e.clientX-r.left)*sx/TILE);
   const row=Math.floor((e.clientY-r.top)*sy/TILE);
-  if(col<0||col>=COLS||row<0||row>=ROWS) return;
-  if(trees.some(t=>t.col===col&&t.row===row)){showLog('すでに木がある！');return;}
-  const tt=TREES[selType];
-  if(pts<tt.cost){showLog('ポイントが足りない…');return;}
-  pts-=tt.cost;
-  trees.push({col,row,x:col*TILE+TILE/2,y:row*TILE+TILE/2,type:selType,stage:0,gTimer:0,koalas:[]});
+  if(col<0||col>=COLS||row<0||row>=ROWS)return;
+  const existing=tiles.find(t=>t.col===col&&t.row===row);
+
+  // カード配置モード
+  if(selectedCard!==null){
+    if(existing&&existing.stage===2&&existing.koalas.length<FAC[existing.fac].maxK){
+      const card=hand[selectedCard];
+      const multi=RARITY[card.rarityIdx].multi[existing.fac];
+      existing.koalas.push({img:card.img,name:card.name,multi,rarityIdx:card.rarityIdx});
+      hand.splice(selectedCard,1);
+      selectedCard=null;
+      showLog('🐨 '+card.name+'を配置！(×'+multi+')');
+      renderHUD();
+    } else {
+      selectedCard=null;
+      showLog(existing?'成熟した施設に配置してね':'成熟した施設を選んでください');
+      renderHUD();
+    }
+    return;
+  }
+
+  // 施設配置モード
+  if(existing){showLog('すでに施設がある！');return;}
+  if(!facUnlocked[selFacType]){showLog('まだ解放されていない！');return;}
+  if(pts<FAC[selFacType].cost){showLog(FAC[selFacType].cost+'ptが必要！');return;}
+  pts-=FAC[selFacType].cost;
+  tiles.push({col,row,x:col*TILE+TILE/2,y:row*TILE+TILE/2,fac:selFacType,stage:0,gTimer:0,koalas:[]});
   renderHUD();
 }
 
 function gameTick(){
-  const now=Date.now();
-  trees.forEach(t=>{
+  tiles.forEach(t=>{
     if(t.stage<2){
       t.gTimer+=1000;
-      if(t.gTimer>=TREES[t.type].growMs){t.stage++;t.gTimer=0;
-        if(t.stage===2) showLog('🌳 '+TREES[t.type].name+'が育った！コアラが来るかも！');
+      if(t.gTimer>=FAC[t.fac].growMs){
+        t.stage++;t.gTimer=0;
+        if(t.stage===2) showLog(FAC[t.fac].emoji+FAC[t.fac].name+'が完成！コアラが来るかも！');
       }
     }
     if(t.stage===2&&t.koalas.length>0){
-      const gain=TREES[t.type].ppm*t.koalas.length;
-      pts+=gain;
+      const base=FAC[t.fac].ppm;
+      pts+=t.koalas.reduce((s,k)=>s+base*(k.multi||1),0);
     }
   });
-  // コアラを呼び込む
-  const mTrees=trees.filter(t=>t.stage===2&&t.koalas.length<TREES[t.type].maxK);
-  if(mTrees.length&&walkers.length<mTrees.length*2+4&&Math.random()<0.35) spawnWalker(mTrees);
+  const mTiles=tiles.filter(t=>t.stage===2&&t.koalas.length<FAC[t.fac].maxK);
+  if(mTiles.length&&walkers.length<mTiles.length*2+4&&Math.random()<0.3) spawnWalker(mTiles);
   renderHUD();
 }
 
-function spawnWalker(mTrees){
+function spawnWalker(mTiles){
   const side=0|Math.random()*4;
   let sx,sy;
   if(side===0){sx=Math.random()*CW;sy=-16;}
   else if(side===1){sx=CW+16;sy=Math.random()*CH;}
   else if(side===2){sx=Math.random()*CW;sy=CH+16;}
   else{sx=-16;sy=Math.random()*CH;}
-  const target=mTrees[0|Math.random()*mTrees.length];
-  const img=kImgs.length?kImgs[0|Math.random()*kImgs.length]:null;
+  const target=mTiles[0|Math.random()*mTiles.length];
+  const img=kPool.length?kPool[0|Math.random()*kPool.length]:null;
   walkers.push({
     x:sx,y:sy,
     tx:target.x+(-8+Math.random()*16),
     ty:target.y+(-8+Math.random()*16),
-    tree:target,state:'walk',
+    tile:target,state:'walk',
     img,name:img?img._n:'コアラ',
     wb:Math.random()*Math.PI*2,
     spd:0.5+Math.random()*0.5,
+    multi:1.0,rarityIdx:0,
   });
 }
 
 function loop(ts){
   requestAnimationFrame(loop);
-  const dt=Math.min(ts-lastTs,50); lastTs=ts; tick++;
+  const dt=Math.min(ts-lastTs,50);lastTs=ts;tick++;
   walkers.forEach(w=>{
-    if(w.state!=='walk') return;
+    if(w.state!=='walk')return;
     const dx=w.tx-w.x,dy=w.ty-w.y,d=Math.sqrt(dx*dx+dy*dy);
-    if(d<1.5){w.state='settled';w.tree.koalas.push(w);}
-    else{w.x+=dx/d*w.spd;w.y+=dy/d*w.spd;}
+    if(d<1.5){
+      w.state='settled';
+      if(w.tile.koalas.length<FAC[w.tile.fac].maxK) w.tile.koalas.push(w);
+    } else {w.x+=dx/d*w.spd;w.y+=dy/d*w.spd;}
     w.wb+=0.09;
   });
   draw();
 }
 
 function draw(){
-  if(!cx) return;
-  // 背景
-  cx.fillStyle='#b8e090'; cx.fillRect(0,0,CW,CH);
-  // 草むら感
+  if(!cx)return;
+  cx.fillStyle='#b8e090';cx.fillRect(0,0,CW,CH);
   cx.fillStyle='#a8d878';
   for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) if((c+r)%2)
     cx.fillRect(c*TILE,r*TILE,TILE,TILE);
-  // グリッド
-  cx.strokeStyle='rgba(0,80,0,0.12)'; cx.lineWidth=0.7;
+  cx.strokeStyle='rgba(0,80,0,0.12)';cx.lineWidth=0.7;
   for(let c=0;c<=COLS;c++){cx.beginPath();cx.moveTo(c*TILE,0);cx.lineTo(c*TILE,CH);cx.stroke();}
   for(let r=0;r<=ROWS;r++){cx.beginPath();cx.moveTo(0,r*TILE);cx.lineTo(CW,r*TILE);cx.stroke();}
 
-  // 木
-  trees.forEach(t=>{
-    const {x,y,stage,type,gTimer,koalas}=t;
-    const tt=TREES[type];
-    // 成長バー
+  tiles.forEach(t=>{
+    const {x,y,stage,fac,gTimer,koalas}=t;
+    const ff=FAC[fac];
     if(stage<2){
-      const pct=gTimer/tt.growMs;
-      cx.fillStyle='rgba(0,0,0,0.18)'; cx.fillRect(x-16,y+16,32,4);
-      cx.fillStyle='#7ab84a'; cx.fillRect(x-16,y+16,32*pct,4);
+      const pct=gTimer/ff.growMs;
+      cx.fillStyle='rgba(0,0,0,0.18)';cx.fillRect(x-16,y+16,32,4);
+      cx.fillStyle='#7ab84a';cx.fillRect(x-16,y+16,32*pct,4);
     }
-    // 木の絵文字
     const sz=[16,24,34][stage];
     const sway=stage===2?Math.sin(tick*0.018+t.col)*2:0;
-    cx.save(); cx.translate(x,y-sz*0.25); cx.rotate(sway*Math.PI/180);
-    cx.font=`${sz}px sans-serif`; cx.textAlign='center'; cx.textBaseline='middle';
-    cx.fillText(['🌱','🌿',tt.emoji][stage],0,0);
+    cx.save();cx.translate(x,y-sz*0.25);cx.rotate(sway*Math.PI/180);
+    cx.font=sz+'px sans-serif';cx.textAlign='center';cx.textBaseline='middle';
+    cx.fillText(['🌱','🌿',ff.emoji][stage],0,0);
     cx.restore();
-    // コアラ数バッジ
     if(stage===2&&koalas.length>0){
       cx.fillStyle='rgba(45,90,27,0.85)';
-      cx.beginPath(); cx.arc(x+14,y-sz*0.6,8,0,Math.PI*2); cx.fill();
-      cx.fillStyle='white'; cx.font='bold 8px sans-serif';
-      cx.textAlign='center'; cx.textBaseline='middle';
+      cx.beginPath();cx.arc(x+14,y-sz*0.6,8,0,Math.PI*2);cx.fill();
+      cx.fillStyle='white';cx.font='bold 8px sans-serif';
+      cx.textAlign='center';cx.textBaseline='middle';
       cx.fillText(koalas.length,x+14,y-sz*0.6);
     }
   });
 
-  // コアラ（歩いている + 定住）
   walkers.forEach(w=>{
-    cx.save(); cx.translate(w.x,w.y);
+    cx.save();cx.translate(w.x,w.y);
     const bob=w.state==='walk'?Math.sin(w.wb)*2:Math.sin(tick*0.03+w.wb)*1;
     cx.translate(0,bob);
     if(w.img&&w.img.complete&&w.img.naturalWidth>0){
-      cx.beginPath(); cx.arc(0,0,10,0,Math.PI*2); cx.clip();
+      cx.beginPath();cx.arc(0,0,10,0,Math.PI*2);cx.clip();
       cx.drawImage(w.img,-10,-10,20,20);
     } else {
-      cx.font='18px sans-serif'; cx.textAlign='center'; cx.textBaseline='middle';
+      cx.font='18px sans-serif';cx.textAlign='center';cx.textBaseline='middle';
       cx.fillText('🐨',0,0);
     }
     cx.restore();
@@ -3101,42 +3168,80 @@ function draw(){
 
 // HUD
 function renderHUD(){
-  const hud=document.getElementById('forest-hud'); if(!hud) return;
-  const settled=walkers.filter(w=>w.state==='settled').length;
-  const ppm=trees.filter(t=>t.stage===2).reduce((s,t)=>s+TREES[t.type].ppm*t.koalas.length,0);
+  const hud=document.getElementById('forest-hud');if(!hud)return;
+  const ppm=tiles.filter(t=>t.stage===2).reduce((s,t)=>{
+    const base=FAC[t.fac].ppm;
+    return s+t.koalas.reduce((ss,k)=>ss+base*(k.multi||1),0);
+  },0);
+
+  const facBtns=FAC.map((f,i)=>{
+    if(facUnlocked[i]){
+      const sel=selFacType===i;
+      return `<button onclick="selectFacType(${i})" style="flex:1;min-width:56px;padding:0.22rem 0.1rem;border-radius:7px;border:2px solid ${sel?'#ffd700':'#4a7c2f'};background:${sel?'#4a7c2f':'white'};color:${sel?'white':'#2d5a1b'};font-size:0.58rem;cursor:pointer;font-family:inherit;font-weight:${sel?700:400};line-height:1.35">${f.emoji}<br>${f.name}<br><span style="opacity:0.75">${f.cost?f.cost+'pt':'無料'}</span></button>`;
+    } else {
+      return `<button onclick="unlockFac(${i})" style="flex:1;min-width:56px;padding:0.22rem 0.1rem;border-radius:7px;border:2px dashed #999;background:#f5f5f5;color:#666;font-size:0.58rem;cursor:pointer;font-family:inherit;line-height:1.35">🔒<br>${f.name}<br><span style="color:#c44;font-weight:700">${f.cost}pt</span></button>`;
+    }
+  }).join('');
+
   hud.innerHTML=`
 <div style="display:flex;justify-content:space-between;align-items:center;background:#2d5a1b;color:white;border-radius:8px;padding:0.4rem 0.7rem;margin-bottom:0.4rem;font-size:0.85rem">
-  <span>🍃 <b>${Math.floor(pts)}</b>pt <span style="font-size:0.68rem;opacity:0.7">+${ppm}/秒</span></span>
-  <span style="font-size:0.72rem;opacity:0.85">🌳${trees.length}本 🐨${settled}匹</span>
+  <span>🍃 <b>${Math.floor(pts)}</b>pt <span style="font-size:0.68rem;opacity:0.7">+${ppm.toFixed(1)}/秒</span></span>
+  <button onclick="doGacha()" style="padding:0.2rem 0.55rem;border-radius:14px;border:none;background:#ffd700;color:#333;font-weight:700;cursor:pointer;font-size:0.72rem;font-family:inherit">🎲 ガチャ 30pt</button>
 </div>
-<div style="display:flex;gap:0.35rem;flex-wrap:wrap;margin-bottom:0.35rem">
-${TREES.map((tt,i)=>`<button onclick="selectForestTree(${i})" style="flex:1;min-width:58px;padding:0.28rem 0.2rem;border-radius:7px;border:2px solid ${selType===i?'#ffd700':'#4a7c2f'};background:${selType===i?'#4a7c2f':'white'};color:${selType===i?'white':'#2d5a1b'};font-size:0.65rem;cursor:pointer;font-family:inherit;font-weight:${selType===i?700:400};line-height:1.3">
-  ${tt.emoji}<br>${tt.name}<br><span style="opacity:0.8">${tt.cost?tt.cost+'pt':'無料'}</span>
-</button>`).join('')}
+<div style="display:flex;gap:0.22rem;flex-wrap:wrap;margin-bottom:0.3rem">${facBtns}</div>`;
+
+  // 手札エリア
+  const handEl=document.getElementById('forest-hand');if(!handEl)return;
+  if(hand.length===0){
+    handEl.innerHTML=`<div style="text-align:center;color:#888;font-size:0.68rem;padding:0.4rem">手札なし ─ ガチャでコアラを引こう！</div>`;
+    return;
+  }
+  const hint=selectedCard!==null?'✅ カード選択中 ─ 完成施設をタップ':'カードをタップして施設に配置';
+  handEl.innerHTML=`<div style="font-size:0.65rem;color:#555;margin-bottom:0.25rem;text-align:center">🃏 手札 ${hand.length}/10 ─ ${hint}</div>
+<div style="display:flex;gap:0.22rem;flex-wrap:wrap;justify-content:center">
+${hand.map((c,i)=>{
+  const r=RARITY[c.rarityIdx];
+  const sel=selectedCard===i;
+  const imgHtml=c.img&&c.img.complete&&c.img.naturalWidth>0
+    ?`<img src="${c.img.src}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;display:block;margin:0 auto">`
+    :`<div style="font-size:20px;line-height:1.7;text-align:center">🐨</div>`;
+  return `<div onclick="selectHandCard(${i})" style="width:54px;text-align:center;cursor:pointer;border-radius:8px;border:2px solid ${sel?'#ffd700':r.col};background:${sel?'#fffbe6':'white'};padding:0.2rem 0.1rem;box-shadow:${sel?'0 0 8px rgba(255,215,0,0.8)':'0 1px 3px rgba(0,0,0,0.12)'};transition:box-shadow 0.15s">
+${imgHtml}
+<div style="font-size:0.46rem;color:${r.col};font-weight:700;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${r.name}</div>
+<div style="font-size:0.46rem;color:#555;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${c.name}</div>
+</div>`;
+}).join('')}
 </div>`;
 }
-window.selectForestTree=function(i){selType=i;renderHUD();};
 
 function showLog(m){
-  const el=document.getElementById('forest-log'); if(!el) return;
+  const el=document.getElementById('forest-log');if(!el)return;
   el.textContent=m;
-  clearTimeout(el._t); el._t=setTimeout(()=>el.textContent='',3000);
+  clearTimeout(el._t);el._t=setTimeout(()=>el.textContent='',3000);
 }
 
 function saveState(){
   try{localStorage.setItem('koala-forest',JSON.stringify({
     pts:Math.floor(pts),
-    trees:trees.map(t=>({col:t.col,row:t.row,type:t.type,stage:t.stage,gTimer:t.gTimer})),
+    tiles:tiles.map(t=>({col:t.col,row:t.row,fac:t.fac,stage:t.stage,gTimer:t.gTimer})),
+    facUnlocked,
+    hand:hand.map(c=>({rarityIdx:c.rarityIdx,name:c.name,imgSrc:c.img?c.img.src:''})),
   }));}catch(e){}
 }
 function loadState(){
   try{
     const d=JSON.parse(localStorage.getItem('koala-forest')||'{}');
     pts=d.pts||10;
-    if(d.trees) trees=d.trees.map(t=>({
+    facUnlocked=d.facUnlocked||[true,false,false,false];
+    if(d.tiles) tiles=d.tiles.map(t=>({
       col:t.col,row:t.row,x:t.col*TILE+TILE/2,y:t.row*TILE+TILE/2,
-      type:t.type,stage:t.stage,gTimer:t.gTimer||0,koalas:[],
+      fac:t.fac||0,stage:t.stage,gTimer:t.gTimer||0,koalas:[],
     }));
+    if(d.hand) hand=d.hand.map(c=>{
+      let img=kPool.find(k=>k.src===c.imgSrc)||null;
+      if(!img&&c.imgSrc){img=new Image();img.src=c.imgSrc;img._n=c.name||'コアラ';}
+      return {rarityIdx:c.rarityIdx||0,img,name:c.name||'コアラ'};
+    });
   }catch(e){pts=10;}
 }
 
