@@ -2848,11 +2848,34 @@ document.addEventListener('DOMContentLoaded', function(){
 
 
 <div id="tab-oyr" class="tab" style="padding:0.5rem;background:#f5fbee;min-height:100%">
-  <div id="oyr-game" style="max-width:440px;margin:0 auto"></div>
+  <div style="max-width:440px;margin:0 auto">
+    <div id="oyr-game"></div>
+    <div style="background:#eaf6e0;border:1px solid #b0d898;border-radius:8px;padding:0.45rem 0.6rem;margin-top:0.5rem;font-size:0.68rem;color:#3a5a20;line-height:1.7">
+      <b>📖 おやすみリレー ルール</b><br>
+      ① 場のカードと同じ <b>色</b> か <b>数字</b> のカードを出せる<br>
+      ② 出せるカードがなければ「ドロー」で1枚引く<br>
+      ③ 手札を0枚にしたら勝ち！<br>
+      🌙 スキップ：次のプレイヤーを飛ばす<br>
+      🔄 リバース：順番を逆にする<br>
+      ➕ ドロー2：次のプレイヤーが2枚引く<br>
+      🌈 ワイルド：好きな色に変えられる
+    </div>
+  </div>
 </div>
 
 <div id="tab-bj" class="tab" style="padding:0.5rem;background:#f0fbe8;min-height:100%">
-  <div id="bj-game" style="max-width:440px;margin:0 auto"></div>
+  <div style="max-width:440px;margin:0 auto">
+    <div id="bj-game"></div>
+    <div style="background:#e8f5e0;border:1px solid #a8d890;border-radius:8px;padding:0.45rem 0.6rem;margin-top:0.5rem;font-size:0.68rem;color:#3a5a20;line-height:1.7">
+      <b>📖 のんびりブラックジャック ルール</b><br>
+      ① カードの合計を <b>21時間</b> にできるだけ近づける<br>
+      ② 21時間を超えると「寝すぎて大遅刻」でバースト負け<br>
+      ③ ヒット＝カードを1枚追加　スタンド＝これ以上引かない<br>
+      🐨 コアラジャック（絵札）＝ <b>10時間</b><br>
+      ⭐ エース＝ 1 か 11 時間（自動で有利な方）<br>
+      🎉 最初の2枚で21時間 ＝ <b>ぐっすり21</b>（1.5倍）
+    </div>
+  </div>
 </div>
 
 <div id="tab-forest" class="tab" style="padding:0.5rem;background:#e8f5d8;min-height:100%">
@@ -2864,6 +2887,14 @@ document.addEventListener('DOMContentLoaded', function(){
       <div id="forest-msg" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(45,90,27,0.88);color:white;padding:6px 14px;border-radius:20px;font-size:0.85rem;pointer-events:none;opacity:0;transition:opacity 0.4s;white-space:nowrap"></div>
     </div>
     <div id="forest-hand" style="margin:0.3rem 0;min-height:70px"></div>
+    <div style="background:#f0f9e8;border:1px solid #b8d8a0;border-radius:8px;padding:0.45rem 0.6rem;margin:0.3rem 0;font-size:0.68rem;color:#3a5a20;line-height:1.7">
+      <b>📖 あそびかた</b><br>
+      ① 上のボタンで施設を選んで、マスをタップ → 建設<br>
+      ② 完成（🌴マーク）すると、野生コアラが自動で来てポイント獲得<br>
+      ③ 🎲ガチャ（30pt）でコアラカードを引く → 手札に追加<br>
+      ④ 手札カードをタップ→完成施設をタップ → そのコアラを配置（能力ボーナス付き）<br>
+      ⑤ ポイントが貯まったら🔒施設を解放して、より高収入の施設を建設しよう！
+    </div>
     <div id="forest-log" style="font-size:0.7rem;color:#555;text-align:center;min-height:1.2rem;margin-top:0.2rem"></div>
   </div>
 </div>
