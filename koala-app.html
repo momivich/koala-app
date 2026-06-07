@@ -1735,7 +1735,7 @@ function startQuiz(){
 function loadQ(){
   answered=false;
   const k=qList[qIdx];
-  document.getElementById('qface').innerHTML=k.img?`<img src="${k.img}" alt="?" style="width:110px;height:110px;object-fit:cover;border-radius:10px">`:koalaFace(k,110);
+  document.getElementById('qface').innerHTML=k.img?`<img src="${k.img}" alt="?" style="width:200px;height:200px;object-fit:cover;border-radius:14px;box-shadow:0 2px 10px rgba(0,0,0,0.15)">`:koalaFace(k,200);
   document.getElementById('qres').textContent='';
   document.getElementById('qnxtbtn').disabled=true;
   document.getElementById('q-n').textContent=qIdx+1;
