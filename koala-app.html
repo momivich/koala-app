@@ -4248,7 +4248,7 @@ const TYPES=[
   {name:'仲良しペア',  r:63, col:'#77aa88',dark:'#447755'},
   {name:'三兄弟',      r:78, col:'#668899',dark:'#334466'},
   {name:'大家族',      r:94, col:'#556688',dark:'#223355'},
-  {name:'黄金のきらら',r:22, col:'#ffd700',dark:'#cc8800',special:true},
+  {name:'黄金のきらら',r:30, col:'#ffd700',dark:'#cc8800',special:true},
 ];
 const PTS=[1,3,6,10,15,21,28,36,0]; // きらら消えで別途500pt
 
@@ -4263,6 +4263,7 @@ const IMG_SRCS=[
   'koala-images/さち/sczoo_2024.jpg',
 ];
 const IMGS=IMG_SRCS.map(s=>{const i=new Image();i.src=s;return i;});
+const KIRARA_IMG=(()=>{const i=new Image();i.src='koala-images/きらら/metro_2020.jpg';return i;})();
 
 let cv,cx2,circles,score,hiScore=0,nextType,dropX,gameOver,dropCooldown,sparks,bonusText=null,_raf=null,_lt2=0;
 
@@ -4298,14 +4299,28 @@ function drawCirc(c,ox,oy){
     // Rim
     cx2.strokeStyle='rgba(255,255,255,.7)';cx2.lineWidth=1.5;
     cx2.beginPath();cx2.arc(0,0,t.r,0,Math.PI*2);cx2.stroke();
-    // ✨ emoji center
-    cx2.font=`${Math.round(t.r*.7)}px sans-serif`;
-    cx2.textAlign='center';cx2.textBaseline='middle';
-    cx2.fillText('✨',0,0);
+    // きらら顔（円クリップ）
+    const fr=t.r*.76;
+    cx2.save();
+    cx2.beginPath();cx2.arc(0,0,fr,0,Math.PI*2);cx2.clip();
+    if(KIRARA_IMG.complete&&KIRARA_IMG.naturalWidth>0){
+      cx2.drawImage(KIRARA_IMG,-fr,-fr,fr*2,fr*2);
+    } else {
+      cx2.font=`${Math.round(t.r*.7)}px sans-serif`;
+      cx2.textAlign='center';cx2.textBaseline='middle';
+      cx2.fillText('✨',0,0);
+    }
+    cx2.restore();
+    // 顔の周りの金リング
+    cx2.strokeStyle='rgba(255,200,0,0.9)';cx2.lineWidth=2.5;
+    cx2.beginPath();cx2.arc(0,0,fr,0,Math.PI*2);cx2.stroke();
     // Name
-    cx2.font=`bold 6px "Hiragino Kaku Gothic ProN",sans-serif`;
-    cx2.textBaseline='bottom';cx2.fillStyle='rgba(80,40,0,.9)';
-    cx2.fillText(t.name,0,t.r-1);
+    cx2.font=`bold 7px "Hiragino Kaku Gothic ProN",sans-serif`;
+    cx2.textAlign='center';cx2.textBaseline='bottom';
+    cx2.fillStyle='rgba(80,40,0,.95)';
+    cx2.strokeStyle='rgba(255,240,180,0.9)';cx2.lineWidth=2.5;
+    cx2.strokeText('きらら',0,t.r+1);
+    cx2.fillText('きらら',0,t.r+1);
     cx2.restore();
     return;
   }
