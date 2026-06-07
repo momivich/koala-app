@@ -208,6 +208,21 @@ nav button.active{color:white;background:rgba(255,255,255,0.2);border-bottom:3px
 .mtt-yaku-tbl td{padding:3px 4px;vertical-align:middle}
 .mtt-yaku-tbl .pts{text-align:right;font-weight:700;color:#e65100;white-space:nowrap}
 .mtt-yaku-tbl .desc{color:#888;font-size:0.67rem}
+/* ── のんびりブラックジャック ── */
+.bj-card{width:70px;height:100px;background:white;border:1.5px solid #b8d89a;border-radius:8px;display:flex;flex-direction:column;justify-content:space-between;padding:3px 4px;box-shadow:0 2px 5px rgba(0,0,0,0.1);flex-shrink:0;position:relative}
+.bj-card-tl{font-size:0.72rem;font-weight:700;color:#2d5a1b;line-height:1}
+.bj-card-br{font-size:0.72rem;font-weight:700;color:#2d5a1b;transform:rotate(180deg);align-self:flex-end;line-height:1}
+.bj-card-mid{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
+.bj-back{background:linear-gradient(135deg,#4a7c2f 0%,#2d5a1b 100%);display:flex;align-items:center;justify-content:center;font-size:2rem;border-color:#2d5a1b}
+.bj-hand{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:0.4rem 0;min-height:108px;align-items:flex-start}
+.bj-area{margin:0.3rem 0;background:rgba(255,255,255,0.7);border-radius:10px;padding:0.4rem 0.6rem}
+.bj-dlabel{font-size:0.78rem;color:#2d5a1b;font-weight:700}
+.bj-val{color:#e67e22;font-weight:700}
+.bj-val.over{color:#c0392b}
+.bj-btn{background:#4a7c2f;color:white;border:none;padding:0.65rem 1.1rem;border-radius:16px;font-size:0.88rem;cursor:pointer;font-family:inherit;font-weight:700}
+.bj-btn-stand{background:#e67e22}
+.bj-btn-main{background:#2d5a1b;color:white;border:none;padding:0.75rem 2rem;border-radius:22px;font-size:1rem;cursor:pointer;font-family:inherit;font-weight:700;display:inline-block}
+.bj-btn-sub{background:white;color:#4a7c2f;border:2px solid #4a7c2f;padding:0.6rem 1rem;border-radius:16px;font-size:0.82rem;cursor:pointer;font-family:inherit}
 /* ── うたゲーム アニメーション ── */
 @keyframes utaSway{
   0%,100%{transform:rotate(-4deg) scale(1.0);}
@@ -260,6 +275,7 @@ nav button.active{color:white;background:rgba(255,255,255,0.2);border-bottom:3px
   <button onclick="showTab('suika',this);if(window.startSuikaGame)startSuikaGame()">🍉 スイカ</button>
   <button onclick="showTab('kioku',this);if(window.startMemoryGame)startMemoryGame()">🧠 記憶</button>
   <button onclick="showTab('uta',this)">🎵 うた</button>
+  <button onclick="showTab('bj',this)">💤 BJ</button>
 </nav>
 
 <div id="tab-tree" class="tab active">
@@ -1798,6 +1814,7 @@ function showTab(name,btn){
   // canvas系タブはdisplay:flex、通常タブはdisplay:block
   tab.style.display=(name==='suika'||name==='kioku')?'flex':'block';
   if(name==='uta'&&window.initUtaGame) initUtaGame();
+  if(name==='bj'&&window.initBjGame) initBjGame();
   btn.classList.add('active');
   if(name!=='suika'&&window.stopSuikaGame) stopSuikaGame();
   if(name!=='kioku'&&window.stopMemoryGame) stopMemoryGame();
@@ -2815,6 +2832,10 @@ document.addEventListener('DOMContentLoaded', function(){
 </div>
 
 
+<div id="tab-bj" class="tab" style="padding:0.5rem;background:#f0fbe8;min-height:100%">
+  <div id="bj-game" style="max-width:440px;margin:0 auto"></div>
+</div>
+
 <div id="tab-uta" class="tab" style="padding:0.5rem;background:#f5fbee;min-height:100%">
   <div id="uta-game" style="max-width:420px;margin:0 auto"></div>
 </div>
@@ -2875,6 +2896,214 @@ document.addEventListener('DOMContentLoaded', function(){
     </details>
   </div>
 </div>
+
+<!-- ===== のんびりブラックジャック ===== -->
+<script>
+(function(){
+'use strict';
+
+// ── フェイスカードのコアラを固定 ──────────────────────
+function findK(name){ return (typeof KK!=='undefined'&&KK.find(k=>k.name===name))||null; }
+const FACE_K={
+  J: findK('きらら')  || (typeof KK!=='undefined'?KK.find(k=>k.img):null),
+  Q: findK('もなか')  || null,
+  K: findK('ティリー')|| null,
+};
+
+// ── デッキ ──────────────────────────────────────────
+const SUITS=['🐨','🌿','🌳','🍃'];
+
+function buildDeck(){
+  const d=[];
+  SUITS.forEach(suit=>{
+    for(let v=1;v<=13;v++){
+      let name,bv,fk=null;
+      if(v===1){name='A';bv=[1,11];}
+      else if(v<=10){name=String(v);bv=[v];}
+      else{name=v===11?'J':v===12?'Q':'K';bv=[10];fk=v===11?FACE_K.J:v===12?FACE_K.Q:FACE_K.K;}
+      d.push({name,bv,suit,fk});
+    }
+  });
+  return shuffle(d);
+}
+
+function shuffle(a){
+  a=[...a];
+  for(let i=a.length-1;i>0;i--){const j=0|Math.random()*(i+1);[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+
+function handVal(hand){
+  let t=0,aces=0;
+  hand.forEach(c=>{if(c.name==='A'){aces++;t+=11;}else t+=c.bv[0];});
+  while(t>21&&aces>0){t-=10;aces--;}
+  return t;
+}
+
+// ── 状態 ────────────────────────────────────────────
+let deck=[],ph=[],dh=[],state='start',wins=0,losses=0,draws=0,streak=0,bjInited=false;
+
+function initBj(){
+  if(!bjInited){bjInited=true;}
+  deck=buildDeck(); ph=[]; dh=[]; state='start';
+  render();
+}
+window.initBjGame=initBj;
+
+function deal(){
+  if(deck.length<10) deck=buildDeck();
+  ph=[deck.pop(),deck.pop()];
+  dh=[deck.pop(),deck.pop()];
+  // コアラジャック判定
+  if(handVal(ph)===21&&ph.length===2){state='bj';setTimeout(dealerPlay,700);}
+  else state='playing';
+  render();
+}
+window.bjDeal=deal;
+
+function hit(){
+  if(state!=='playing') return;
+  ph.push(deck.pop());
+  const v=handVal(ph);
+  if(v>21){setTimeout(()=>{state='bust';resolve();render();},300);}
+  else if(v===21){state='stand_auto';setTimeout(dealerPlay,500);}
+  render();
+}
+window.bjHit=hit;
+
+function stand(){
+  if(state!=='playing') return;
+  state='stand';
+  setTimeout(dealerPlay,400);
+  render();
+}
+window.bjStand=stand;
+
+function dealerPlay(){
+  state='dealer'; render();
+  const tick=()=>{
+    if(handVal(dh)<17){dh.push(deck.pop());render();setTimeout(tick,550);}
+    else{resolve();}
+  };
+  setTimeout(tick,500);
+}
+
+function resolve(){
+  const pv=handVal(ph), dv=handVal(dh);
+  const pBJ=ph.length===2&&pv===21;
+  const dBJ=dh.length===2&&dv===21;
+  const p21=(pv===21&&ph.length>=3); // ぐっすり21
+  if(pv>21){state='lose_bust';losses++;streak=0;}
+  else if(dv>21){state='win_dbust';wins++;streak++;}
+  else if(pBJ&&!dBJ){state='bj_win';wins++;streak++;}
+  else if(pv===dv){state='push';draws++;}
+  else if(pv>dv){state=p21?'win_21':'win';wins++;streak++;}
+  else{state='lose';losses++;streak=0;}
+  render();
+}
+
+// ── カード描画 ────────────────────────────────────────
+function cardHTML(c,hidden){
+  if(hidden) return `<div class="bj-card bj-back">🐨</div>`;
+  const hrs=c.name==='A'?'1/11':c.bv[0];
+  let mid='';
+  if(c.fk&&c.fk.img){
+    mid=`<img src="./${c.fk.img}" style="width:44px;height:44px;border-radius:5px;object-fit:cover" onerror="this.style.display='none'">
+         <div style="font-size:0.46rem;color:#555;max-width:62px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center">${c.fk.name||''}</div>`;
+  } else {
+    mid=`<div style="font-size:1.3rem">${c.suit}</div>
+         <div style="font-size:0.62rem;color:#2d5a1b;font-weight:700">${hrs}時間</div>`;
+  }
+  return `<div class="bj-card">
+    <div class="bj-card-tl">${c.suit}${c.name}</div>
+    <div class="bj-card-mid">${mid}</div>
+    <div class="bj-card-br">${c.name}${c.suit}</div>
+  </div>`;
+}
+
+// ── レンダー ──────────────────────────────────────────
+function el(){return document.getElementById('bj-game');}
+
+const RESULTS={
+  bj_win: {e:'✨',t:'コアラジャック！',m:'A+絵札でぴったり21時間！伝説の昼寝！',c:'#c0830a'},
+  win_21: {e:'😴💫',t:'ぐっすり21時間！',m:'3枚以上でぴったり21時間！すごい！',c:'#2d5a1b'},
+  win:    {e:'🎉',t:'勝ち！',m:'よく眠れました！すっきり目覚め！',c:'#2d5a1b'},
+  win_dbust:{e:'🎊',t:'ディーラーが寝すぎ！',m:'ディーラーコアラがバースト！あなたの勝ち！',c:'#2d5a1b'},
+  lose_bust:{e:'😵',t:'寝すぎ大遅刻！',m:'21時間を超えてバースト…次こそ！',c:'#c0392b'},
+  lose:   {e:'😔',t:'負け…',m:'ディーラーコアラの方がよく眠れた',c:'#c0392b'},
+  push:   {e:'🤝',t:'引き分け',m:'おそろいの睡眠時間！',c:'#888'},
+};
+const DONE=['bj_win','win_21','win','win_dbust','lose_bust','lose','push'];
+
+function render(){
+  const e=el(); if(!e) return;
+  const showD=state!=='playing'&&state!=='stand_auto';
+  const isDone=DONE.includes(state);
+  const pv=handVal(ph), dv=handVal(dh);
+  const strk=streak>1?` 🔥${streak}連勝！`:'';
+
+  if(state==='start'){
+    e.innerHTML=`
+<div style="text-align:center;padding:1.5rem 0.8rem">
+  <div style="font-size:2.8rem">🐨💤</div>
+  <div style="font-size:1.2rem;font-weight:700;color:#2d5a1b;margin:0.4rem 0">のんびり・ブラックジャック</div>
+  <div style="color:#555;font-size:0.88rem;line-height:1.7;margin:0.6rem 0">
+    コアラは1日<strong>21時間</strong>眠ります。<br>
+    21時間を超えずに、一番近い方が勝ち！<br>
+    超えたら <strong>「寝すぎ大遅刻」</strong> でバースト💦
+  </div>
+  <div style="background:#e8f5e0;border-radius:10px;padding:0.6rem 0.8rem;font-size:0.8rem;color:#2d5a1b;margin:0.6rem 0;text-align:left">
+    🃏 <b>A（エース）</b>＝1か11時間<br>
+    🃏 <b>J / Q / K</b>＝10時間（コアラ顔写真入り）<br>
+    ✨ <b>コアラジャック</b>＝A＋絵札で即21時間！<br>
+    😴 <b>ぐっすり21</b>＝3枚以上でぴったり21時間！
+  </div>
+  <div style="font-size:0.8rem;color:#888;margin-bottom:1rem">${wins}勝 ${losses}敗 ${draws}引き分け${strk}</div>
+  <button onclick="bjDeal()" class="bj-btn-main">🛏 おやすみなさい（配る）</button>
+</div>`;
+    return;
+  }
+
+  const res=isDone?RESULTS[state]:null;
+  e.innerHTML=`
+<div style="padding:0.5rem 0.3rem">
+  <div style="text-align:right;font-size:0.72rem;color:#888;margin-bottom:0.3rem">${wins}勝 ${losses}敗 ${draws}引き分け${strk}</div>
+
+  <div class="bj-area">
+    <div class="bj-dlabel">💤 ディーラーコアラ
+      <span class="bj-val ${showD&&dv>21?'over':''}">${showD?dv+'時間':'？'}</span>
+    </div>
+    <div class="bj-hand">${dh.map((c,i)=>cardHTML(c,!showD&&i===1)).join('')}</div>
+  </div>
+
+  <div class="bj-area">
+    <div class="bj-dlabel">👤 あなた
+      <span class="bj-val ${pv>21?'over':''}">${pv}時間</span>
+    </div>
+    <div class="bj-hand">${ph.map(c=>cardHTML(c,false)).join('')}</div>
+  </div>
+
+  ${res?`<div style="text-align:center;padding:0.5rem;background:#fff;border-radius:10px;border:2px solid ${res.c};margin:0.4rem 0">
+    <div style="font-size:2rem">${res.e}</div>
+    <div style="font-size:1.05rem;font-weight:700;color:${res.c}">${res.t}</div>
+    <div style="font-size:0.8rem;color:#555">${res.m}</div>
+  </div>`:''}
+
+  ${state==='dealer'?`<div style="text-align:center;color:#888;font-size:0.82rem;padding:0.3rem">ディーラーコアラが引いています…💤</div>`:''}
+
+  <div style="display:flex;gap:0.5rem;justify-content:center;margin-top:0.7rem;flex-wrap:wrap">
+    ${state==='playing'?`
+      <button onclick="bjHit()" class="bj-btn">💤 もっと寝る</button>
+      <button onclick="bjStand()" class="bj-btn bj-btn-stand">🌅 起きる</button>
+    `:''}
+    ${isDone?`<button onclick="bjDeal()" class="bj-btn-main" style="font-size:0.9rem;padding:0.65rem 1.5rem">🛏 次のゲーム</button>`:''}
+    ${isDone?`<button onclick="initBjGame()" class="bj-btn-sub">🏠 記録リセット</button>`:''}
+  </div>
+</div>`;
+}
+
+})();
+</script>
 
 <!-- ===== コアラうたゲーム ===== -->
 <script>
