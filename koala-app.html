@@ -208,6 +208,37 @@ nav button.active{color:white;background:rgba(255,255,255,0.2);border-bottom:3px
 .mtt-yaku-tbl td{padding:3px 4px;vertical-align:middle}
 .mtt-yaku-tbl .pts{text-align:right;font-weight:700;color:#e65100;white-space:nowrap}
 .mtt-yaku-tbl .desc{color:#888;font-size:0.67rem}
+/* ── うたゲーム アニメーション ── */
+@keyframes utaSway{
+  0%,100%{transform:rotate(-4deg) scale(1.0);}
+  50%{transform:rotate(4deg) scale(1.07);}
+}
+@keyframes utaNoteFloat{
+  0%{opacity:1;transform:translateY(0) scale(1) rotate(0deg);}
+  100%{opacity:0;transform:translateY(-90px) scale(0.4) rotate(30deg);}
+}
+@keyframes utaRing{
+  0%{transform:scale(0.3);opacity:0.8;border-width:4px;}
+  100%{transform:scale(3.5);opacity:0;border-width:1px;}
+}
+@keyframes utaPulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(74,124,47,0.5);}
+  50%{box-shadow:0 0 0 14px rgba(74,124,47,0);}
+}
+.uta-singing{
+  animation:utaSway 0.38s ease-in-out infinite, utaPulse 0.76s ease-in-out infinite;
+}
+.uta-note{
+  position:absolute;pointer-events:none;font-size:1.5rem;
+  animation:utaNoteFloat 1.2s ease-out forwards;
+  z-index:10;
+}
+.uta-ring{
+  position:absolute;border:4px solid rgba(74,124,47,0.7);
+  border-radius:50%;pointer-events:none;
+  animation:utaRing 1.4s ease-out forwards;
+  z-index:1;
+}
 </style>
 </head>
 <body>
@@ -2922,9 +2953,8 @@ function renderRound(){
   <div style="font-size:0.78rem;color:#888;margin-bottom:0.5rem">ラウンド ${round+1} / ${ROUNDS}　合計: ${score}点</div>
 
   <div style="display:flex;flex-direction:column;align-items:center;gap:0.3rem;margin-bottom:0.7rem">
-    <div style="position:relative;display:inline-block">
-      ${koalaImg(k,76)}
-      <div id="uta-bubble" style="display:none;position:absolute;top:-8px;right:-20px;background:#fff;border:2px solid #7ab84a;border-radius:12px;padding:2px 7px;font-size:1.1rem;z-index:3">🎵</div>
+    <div id="uta-stage" style="position:relative;display:inline-flex;align-items:center;justify-content:center;width:120px;height:120px">
+      <img id="uta-koala-img" src="./koala-images/${k?k.zoo:''}/${k?k.img:''}" style="width:88px;height:88px;border-radius:50%;object-fit:cover;border:3px solid #7ab84a;position:relative;z-index:2" onerror="this.style.display='none'">
     </div>
     <div style="font-weight:700;color:#2d5a1b;font-size:0.9rem">${name}が歌うよ！</div>
   </div>
@@ -2996,15 +3026,48 @@ function renderPiano(){
 // ── Actions ───────────────────────────────────────────
 function utaPlayTarget(){
   if(!target) return;
-  const bubble=document.getElementById('uta-bubble');
-  if(bubble){
-    bubble.style.display='block';
-    clearTimeout(bubble._t);
-    bubble._t=setTimeout(()=>{if(bubble)bubble.style.display='none';},1700);
-  }
   playPitch(target.freq,1.5,true);
+  startSingingAnim(1.6);
 }
 window.utaPlayTarget=utaPlayTarget;
+
+function startSingingAnim(dur){
+  const stage=document.getElementById('uta-stage');
+  const img=document.getElementById('uta-koala-img');
+  if(!stage||!img) return;
+
+  // コアラ揺れ
+  img.classList.add('uta-singing');
+  setTimeout(()=>img.classList.remove('uta-singing'),dur*1000);
+
+  // 音波リング ×3
+  const rings=[0,0.25,0.5];
+  rings.forEach(delay=>{
+    const r=document.createElement('div');
+    r.className='uta-ring';
+    const sz=88;
+    r.style.cssText=`width:${sz}px;height:${sz}px;left:${(120-sz)/2}px;top:${(120-sz)/2}px;animation-delay:${delay}s`;
+    stage.appendChild(r);
+    setTimeout(()=>r.remove(),(dur+delay)*1000+200);
+  });
+
+  // 音符 ♪♫♩ ×5
+  const noteChars=['♪','♫','♩','♬','♪'];
+  const colors=['#4a7c2f','#7ab84a','#e67e22','#2d5a1b','#b5e853'];
+  noteChars.forEach((ch,i)=>{
+    const n=document.createElement('div');
+    n.className='uta-note';
+    n.textContent=ch;
+    const angle=(-60+i*30)*Math.PI/180;
+    const r=48+Math.random()*12;
+    const cx=60,cy=60;
+    const x=cx+Math.cos(angle)*r-12;
+    const y=cy+Math.sin(angle)*r-12;
+    n.style.cssText=`left:${x}px;top:${y}px;color:${colors[i]};animation-delay:${i*0.12}s;animation-duration:${1.0+Math.random()*0.3}s`;
+    stage.appendChild(n);
+    setTimeout(()=>n.remove(),(dur+0.5)*1000);
+  });
+}
 
 function utaSelNote(name){
   if(decided) return;
@@ -3049,7 +3112,9 @@ function utaDecide(){
     正解: <strong style="color:#2d5a1b">${target.name}</strong>　あなた: <strong style="color:${diff===0?'#2d5a1b':'#e67e22'}">${sel}</strong>
   </div>
   <div style="display:flex;align-items:center;justify-content:center;gap:0.8rem;margin:0.5rem 0">
-    ${koalaImg(k,64)}
+    <div id="uta-stage" style="position:relative;display:inline-flex;align-items:center;justify-content:center;width:84px;height:84px;flex-shrink:0">
+      <img id="uta-koala-img" src="./koala-images/${k?k.zoo:''}/${k?k.img:''}" style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:3px solid #7ab84a;position:relative;z-index:2" onerror="this.style.display='none'">
+    </div>
     <div style="text-align:left">
       <div style="font-size:0.78rem;color:#888">${name}が歌ったのは</div>
       <div style="font-size:1.05rem;font-weight:700;color:#2d5a1b">${target.name}（${Math.round(target.freq)}Hz）</div>
@@ -3061,6 +3126,8 @@ function utaDecide(){
     <button onclick="utaNext()" style="background:#e67e22;color:white;border:none;padding:0.55rem 1.2rem;border-radius:15px;font-size:0.88rem;cursor:pointer;font-family:inherit;font-weight:700">${nextLabel}</button>
   </div>
 </div>`;
+  // 正解ならお祝い演出
+  if(diff===0) setTimeout(()=>startSingingAnim(1.4),100);
 }
 window.utaDecide=utaDecide;
 
