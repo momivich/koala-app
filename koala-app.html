@@ -2986,6 +2986,14 @@ const CHARS={
   'ぼたん':   {img:'koala-images/ぼたん/kanazawa_2024.jpg',     col:'#ffaacc'},
   'ポポロ':   {img:'koala-images/ポポロ/S__44449814.jpg',       col:'#ccffaa'},
   'コロン':   {img:'koala-images/コロン/S__44449805.jpg',       col:'#ffaaaa'},
+  // 王子
+  'いぶき':   {img:'koala-images/いぶき/oji_2023.jpeg',         col:'#bbeecc'},
+  'アーティ': {img:'koala-images/アーティ/oji_2016.jpeg',       col:'#aabbdd'},
+  'エマ':     {img:'koala-images/エマ/oji_2019.jpeg',           col:'#ddbbaa'},
+  // 埼玉
+  'さち':     {img:'koala-images/さち/sczoo_2024.jpg',          col:'#ffccdd'},
+  'コハル':   {img:'koala-images/コハル/sczoo_2023.jpg',        col:'#ccffee'},
+  'アサヒ':   {img:'koala-images/アサヒ/sczoo_2025.jpg',        col:'#ffeeaa'},
 };
 
 const BG={
@@ -3006,6 +3014,18 @@ const BG={
   knz_dusk: 'linear-gradient(180deg,#4a148c,#880e4f)',
   knz_end:  'linear-gradient(180deg,#212121,#37474f)',
   knz_hope: 'linear-gradient(180deg,#004d40,#00695c)',
+  // 王子
+  oji_morn: 'linear-gradient(180deg,#c8e6c9,#e8f5e9)',
+  oji_aft:  'linear-gradient(180deg,#66bb6a,#43a047)',
+  oji_end:  'linear-gradient(180deg,#558b2f,#33691e)',
+  // 埼玉
+  sczoo_rain: 'linear-gradient(180deg,#78909c,#90a4ae)',
+  sczoo_clear:'linear-gradient(180deg,#81d4fa,#e1f5fe)',
+  sczoo_end:  'linear-gradient(180deg,#0288d1,#01579b)',
+  // 雨の日
+  rain:       'linear-gradient(180deg,#455a64,#546e7a)',
+  rain_eve:   'linear-gradient(180deg,#37474f,#263238)',
+  rain_end:   'linear-gradient(180deg,#2e3e4e,#1a252f)',
 };
 
 // ── ストーリー定義 ──────────────────────────────────────────
@@ -3138,6 +3158,86 @@ const STORIES={
       'k17':{bg:'tama_end',ch:'ナレーター',t:'END「ポポロのある朝」\n\nポポロ 2024年4月生まれ🌸\n金沢動物園で、今日もすやすや。\n\nそれだけでじゅうぶん。',e:1},
     }
   },
+
+  oji:{
+    title:'いぶきのおひるね', zoo:'王子動物公園', emoji:'🌿', bgCol:'#1a4a2a',
+    desc:'王子の木陰で、ひっそり受け取った気持ち', endCount:1,
+    scenes:{
+      'o0': {bg:'oji_morn',ch:'ナレーター', t:'王子動物公園の、のんびりした昼下がりのこと。',n:'o1'},
+      'o1': {bg:'oji_morn',ch:'いぶき',    t:'（お気に入りの枝にぺったりと落ち着いて）ふあ〜あ。',n:'o2'},
+      'o2': {bg:'oji_morn',ch:'ナレーター', t:'いぶきはユーカリをひとかじりして、目をほそめた。',n:'o3'},
+      'o3': {bg:'oji_morn',ch:'いぶき',    t:'（もぐもぐ……だんだんうとうと）',n:'o4'},
+      'o4': {bg:'oji_morn',ch:'ナレーター', t:'そのまま、こくん。眠ってしまった。',n:'o5'},
+      'o5': {bg:'oji_aft', ch:'アーティ',  t:'（通りかかって、いぶきを見つけた）あらら。',n:'o6'},
+      'o6': {bg:'oji_aft', ch:'ナレーター', t:'アーティは小さく笑って、そっと新鮮なユーカリを隣に置いた。',n:'o7'},
+      'o7': {bg:'oji_aft', ch:'アーティ',  t:'（静かに、そのままどこかへ行ってしまった）',n:'o8'},
+      'o8': {bg:'oji_aft', ch:'いぶき',    t:'（ぱちっと目を開けて）……あれ、起きてた？',n:'o9'},
+      'o9': {bg:'oji_aft', ch:'エマ',      t:'（近くでのんびり葉を食べながら）おはよう。',n:'o10'},
+      'o10':{bg:'oji_aft', ch:'いぶき',    t:'……ユーカリ、増えてる？',n:'o11'},
+      'o11':{bg:'oji_aft', ch:'エマ',      t:'ん。アーティが置いていったよ。',n:'o12'},
+      'o12':{bg:'oji_aft', ch:'いぶき',    t:'（きょろきょろ）…もういないの？',n:'o13'},
+      'o13':{bg:'oji_aft', ch:'エマ',      t:'うん。さっさと行っちゃった。',n:'o14'},
+      'o14':{bg:'oji_aft', ch:'いぶき',    t:'（ユーカリをかじって）……おいしい。',n:'o15'},
+      'o15':{bg:'oji_aft', ch:'ナレーター', t:'いぶきは、しばらくユーカリを食べた。木漏れ日がやわらかく落ちていた。',n:'o16'},
+      'o16':{bg:'oji_aft', ch:'いぶき',    t:'ありがとね、アーティ。（小声で）',n:'o17'},
+      'o17':{bg:'oji_aft', ch:'エマ',      t:'（くすっ）聞こえないよ。',n:'o18'},
+      'o18':{bg:'oji_aft', ch:'いぶき',    t:'いいんだ。気持ちが大事。',n:'o19'},
+      'o19':{bg:'oji_end', ch:'ナレーター', t:'END「いぶきのおひるね」\n\nいぶき 2021年生まれ🌿\n王子動物公園で、今日ものんびり。\n\n気持ちが届けば、それでじゅうぶん。',e:1},
+    }
+  },
+
+  sczoo:{
+    title:'さちのあめあがり', zoo:'埼玉こども動物自然公園', emoji:'☁️', bgCol:'#1a3a55',
+    desc:'雨があがった。それだけで、いい一日', endCount:1,
+    scenes:{
+      'sc0': {bg:'sczoo_rain', ch:'ナレーター', t:'雨があがったあとの、埼玉の空。',n:'sc1'},
+      'sc1': {bg:'sczoo_rain', ch:'さち',      t:'（深呼吸）……きれいな空気。',n:'sc2'},
+      'sc2': {bg:'sczoo_clear',ch:'コハル',    t:'さちー！　外出てきたー？',n:'sc3'},
+      'sc3': {bg:'sczoo_clear',ch:'さち',      t:'うん。雨、あがったね。',n:'sc4'},
+      'sc4': {bg:'sczoo_clear',ch:'コハル',    t:'ユーカリも洗われてておいしそう！',n:'sc5'},
+      'sc5': {bg:'sczoo_clear',ch:'さち',      t:'（葉っぱをくんくん）ほんとだ。いいにおい。',n:'sc6'},
+      'sc6': {bg:'sczoo_clear',ch:'アサヒ',    t:'（やってきて）なにしてるの？',n:'sc7'},
+      'sc7': {bg:'sczoo_clear',ch:'コハル',    t:'雨あがりのユーカリ鑑賞！',n:'sc8'},
+      'sc8': {bg:'sczoo_clear',ch:'アサヒ',    t:'（きょとん）……鑑賞？',n:'sc9'},
+      'sc9': {bg:'sczoo_clear',ch:'さち',      t:'かじって鑑賞してる感じかな。',n:'sc10'},
+      'sc10':{bg:'sczoo_clear',ch:'アサヒ',    t:'（なるほど、と一口かじる）……あ、たしかに。',n:'sc11'},
+      'sc11':{bg:'sczoo_clear',ch:'ナレーター', t:'3匹は並んで、ユーカリをかじった。',n:'sc12'},
+      'sc12':{bg:'sczoo_clear',ch:'さち',      t:'雨の日って、なんかしんみりするけど、',n:'sc13'},
+      'sc13':{bg:'sczoo_clear',ch:'さち',      t:'あがったあとが気持ちいいよね。',n:'sc14'},
+      'sc14':{bg:'sczoo_clear',ch:'コハル',    t:'わかる〜！',n:'sc15'},
+      'sc15':{bg:'sczoo_clear',ch:'アサヒ',    t:'……うん。',n:'sc16'},
+      'sc16':{bg:'sczoo_clear',ch:'ナレーター', t:'雨あがりの午後。それだけで、いい一日。',n:'sc17'},
+      'sc17':{bg:'sczoo_end',  ch:'ナレーター', t:'END「さちのあめあがり」\n\nさち 2024年生まれ🌸\n埼玉こども動物自然公園で、今日もごきげん。\n\n雨あがりの空は、いつもよりきれい。',e:1},
+    }
+  },
+
+  rain:{
+    title:'りんのあめのひ', zoo:'東山動植物園', emoji:'🌧️', bgCol:'#2a3a4a',
+    desc:'気分は晴れなかった。でも、ひとりじゃなかった。', endCount:1,
+    scenes:{
+      'r0': {bg:'rain',    ch:'ナレーター',t:'雨の日の東山動植物園。空はどんよりしていた。',n:'r1'},
+      'r1': {bg:'rain',    ch:'りん',     t:'（木の上で、ぼんやり雨を眺めている）…。',n:'r2'},
+      'r2': {bg:'rain',    ch:'ナレーター',t:'りんは雨が苦手だった。こういう日は、なんとなく気分が落ちてしまう。',n:'r3'},
+      'r3': {bg:'rain',    ch:'もなか',   t:'（りんを見つけて）りんちゃん、今日はここにいるんだね。',n:'r4'},
+      'r4': {bg:'rain',    ch:'りん',     t:'…うん。なんか、雨の日って。',n:'r5'},
+      'r5': {bg:'rain',    ch:'もなか',   t:'ん？',n:'r6'},
+      'r6': {bg:'rain',    ch:'りん',     t:'なんでもない。苦手なんだよ、こういう日が。',n:'r7'},
+      'r7': {bg:'rain',    ch:'ナレーター',t:'もなかは「わかった」とだけ言って、そっと隣に座った。',n:'r8'},
+      'r8': {bg:'rain',    ch:'りん',     t:'…無理に明るくしなくていいから。',n:'r9'},
+      'r9': {bg:'rain',    ch:'もなか',   t:'してないよ。（のんびり、雨を眺めた）',n:'r10'},
+      'r10':{bg:'rain',    ch:'ナレーター',t:'雨音だけが続いた。しばらく、二匹は何も言わなかった。',n:'r11'},
+      'r11':{bg:'rain',    ch:'きらら',   t:'（やってきて）あれ、二人してぼんやりしてる。',n:'r12'},
+      'r12':{bg:'rain',    ch:'もなか',   t:'今日はそういう日。',n:'r13'},
+      'r13':{bg:'rain',    ch:'きらら',   t:'あ、そっか。（自分も座る）…今日は眠い日だね。',n:'r14'},
+      'r14':{bg:'rain',    ch:'ナレーター',t:'三匹は並んで、雨を眺めた。誰も何かをしようとしなかった。',n:'r15'},
+      'r15':{bg:'rain_eve',ch:'ししお',   t:'（遠くから、静かに）雨の音も、悪くないわい。',n:'r16'},
+      'r16':{bg:'rain_eve',ch:'りん',     t:'（小さく、うなずく）',n:'r17'},
+      'r17':{bg:'rain_eve',ch:'ナレーター',t:'気分は晴れなかった。でも、少しだけ、楽になった気がした。',n:'r18'},
+      'r18':{bg:'rain_eve',ch:'りん',     t:'（小声で）ありがとね。',n:'r19'},
+      'r19':{bg:'rain_eve',ch:'もなか',   t:'うん。（それだけ言った）',n:'r20'},
+      'r20':{bg:'rain_end', ch:'ナレーター',t:'END「りんのあめのひ」\n\n気分は晴れなかった。\nでも、ひとりじゃなかった。\n\nそれだけで、じゅうぶんだった。',e:1},
+    }
+  },
 };
 
 // ── エンジン ──────────────────────────────────────────
@@ -3222,28 +3322,124 @@ Object.entries(CHARS).forEach(([name,c])=>{
   if(c.img){const i=new Image();i.src='./'+c.img;IMGS[name]=i;}
 });
 
+// ── BGM / SE ─────────────────────────────────────────────────
+// ペンタトニック旋律 [Hz, 秒]
+const BGMS={
+  higashiyama:[[330,.5],[294,.5],[262,.8],[0,.3],[294,.4],[330,.5],[392,.5],[330,.8],[0,.4],[440,.5],[392,.5],[330,.5],[294,.8],[0,.5]],
+  tama:       [[523,.3],[440,.3],[523,.3],[587,.5],[523,.8],[0,.3],[440,.3],[392,.3],[440,.3],[523,.5],[440,.8],[0,.3],[392,.3],[330,.3],[392,.3],[440,.5],[392,.8],[0,.5]],
+  kanazawa:   [[392,.5],[330,.5],[294,.8],[0,.3],[330,.4],[294,.4],[262,.8],[0,.5],[294,.4],[330,.5],[392,.5],[330,.8],[0,.5]],
+  oji:        [[440,.4],[523,.4],[440,.4],[392,.6],[0,.3],[330,.4],[392,.4],[440,.4],[523,.6],[0,.4],[440,.4],[392,.4],[330,.4],[294,.6],[0,.5]],
+  sczoo:      [[523,.3],[587,.3],[523,.3],[440,.5],[0,.2],[392,.3],[440,.3],[523,.4],[440,.6],[0,.3],[330,.3],[392,.3],[440,.3],[523,.5],[0,.4]],
+  rain:       [[262,.8],[294,.6],[0,.4],[262,.6],[0,.4],[330,.6],[294,.6],[262,1.0],[0,.6],[220,.7],[247,.7],[262,.8],[0,.8]],
+};
+
+let novelAC=null,bgmNotes2=[],bgmIdx2=0,bgmNext2=0,bgmRun2=false,novelMuted=false;
+
+function getNovelAC(){
+  if(!novelAC)novelAC=new(window.AudioContext||window.webkitAudioContext)();
+  if(novelAC.state==='suspended')novelAC.resume();
+  return novelAC;
+}
+function startNovelBGM(sid){
+  bgmRun2=false;
+  if(novelMuted)return;
+  bgmNotes2=BGMS[sid]||BGMS.higashiyama;
+  bgmIdx2=0;bgmRun2=true;
+  const ac=getNovelAC();bgmNext2=ac.currentTime+.05;
+  scheduleNBGM();
+}
+function stopNovelBGM(){bgmRun2=false;}
+function scheduleNBGM(){
+  if(!bgmRun2)return;
+  const ac=getNovelAC();
+  while(bgmNext2<ac.currentTime+.5){
+    const [f,d]=bgmNotes2[bgmIdx2%bgmNotes2.length];
+    if(f>0){
+      const o=ac.createOscillator(),g=ac.createGain();
+      o.type='triangle';o.connect(g);g.connect(ac.destination);
+      o.frequency.setValueAtTime(f,bgmNext2);
+      g.gain.setValueAtTime(.055,bgmNext2);
+      g.gain.exponentialRampToValueAtTime(.001,bgmNext2+d*.88);
+      o.start(bgmNext2);o.stop(bgmNext2+d+.05);
+    }
+    bgmNext2+=d;bgmIdx2++;
+  }
+  setTimeout(scheduleNBGM,200);
+}
+function sfxNTap(){
+  if(novelMuted)return;
+  try{
+    const ac=getNovelAC(),o=ac.createOscillator(),g=ac.createGain();
+    o.type='sine';o.frequency.value=1047;o.connect(g);g.connect(ac.destination);
+    g.gain.setValueAtTime(.05,ac.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+.14);
+    o.start();o.stop(ac.currentTime+.15);
+  }catch(e){}
+}
+function sfxNChoice(){
+  if(novelMuted)return;
+  try{
+    const ac=getNovelAC();
+    [[880,.08],[1047,.06]].forEach(([f,d],i)=>{
+      const o=ac.createOscillator(),g=ac.createGain();
+      o.type='sine';o.frequency.value=f;o.connect(g);g.connect(ac.destination);
+      const t=ac.currentTime+i*.1;
+      g.gain.setValueAtTime(.06,t);g.gain.exponentialRampToValueAtTime(.001,t+d);
+      o.start(t);o.stop(t+d+.02);
+    });
+  }catch(e){}
+}
+function toggleNovelMute(){
+  novelMuted=!novelMuted;
+  try{localStorage.setItem('koala-novel-mute',novelMuted?'1':'0');}catch(e){}
+  if(novelMuted)stopNovelBGM();
+  else if(storyId)startNovelBGM(storyId);
+  const btn=document.getElementById('novel-mute-btn');
+  if(btn)btn.textContent=novelMuted?'🔇':'🔊';
+}
+window.toggleNovelMute=toggleNovelMute;
+
+// ── エンジン ──────────────────────────────────────────
 let storyId=null,cur=null,typTimer=null,fullTxt='',isTyping=false,seenEnds={};
 
 function initNovelGame(){
   const el=document.getElementById('novel-game');
   if(!el||el._init)return;el._init=true;
+  // フェードインCSS注入
+  if(!document.getElementById('novel-anim-style')){
+    const s=document.createElement('style');
+    s.id='novel-anim-style';
+    s.textContent='@keyframes nFadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}';
+    document.head.appendChild(s);
+  }
   try{
+    novelMuted=localStorage.getItem('koala-novel-mute')==='1';
     const d=JSON.parse(localStorage.getItem('koala-novel2')||'{}');
     storyId=d.storyId||null; cur=d.scene||null; seenEnds=d.seenEnds||{};
   }catch(e){}
-  if(storyId&&cur&&STORIES[storyId]&&STORIES[storyId].scenes[cur]) novelRender();
-  else novelMenu();
+  if(storyId&&cur&&STORIES[storyId]&&STORIES[storyId].scenes[cur]){
+    startNovelBGM(storyId);novelRender();
+  } else novelMenu();
 }
 window.initNovelGame=initNovelGame;
 
+function muteBtn(){
+  return `<button id="novel-mute-btn" onclick="toggleNovelMute()" style="padding:0.18rem 0.45rem;border-radius:10px;border:1px solid rgba(255,255,255,0.35);background:rgba(0,0,0,0.22);color:rgba(255,255,255,0.8);font-size:0.7rem;cursor:pointer;font-family:inherit">${novelMuted?'🔇':'🔊'}</button>`;
+}
+
 function novelMenu(){
   storyId=null;cur=null;
+  stopNovelBGM();
   const el=document.getElementById('novel-game');if(!el)return;
   el.style.background='linear-gradient(180deg,#1b5e20,#2e7d32)';
+  el.style.animation='nFadeIn .35s ease';
   el.innerHTML=`<div style="min-height:100vh;padding:1.2rem;box-sizing:border-box;display:flex;flex-direction:column">
-<div style="text-align:center;color:white;margin-bottom:1.4rem;padding-top:0.5rem">
-  <div style="font-size:1.4rem;font-weight:700;text-shadow:0 2px 8px rgba(0,0,0,0.4)">📚 コアラのサウンドノベル</div>
-  <div style="font-size:0.7rem;opacity:0.75;margin-top:0.3rem">動物園のコアラたちの物語</div>
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;padding-top:0.3rem">
+  <div style="color:white">
+    <div style="font-size:1.3rem;font-weight:700;text-shadow:0 2px 8px rgba(0,0,0,0.4)">📚 コアラのサウンドノベル</div>
+    <div style="font-size:0.65rem;opacity:0.75;margin-top:0.2rem">動物園のコアラたちの物語</div>
+  </div>
+  ${muteBtn()}
 </div>
 <div style="display:flex;flex-direction:column;gap:0.8rem">
 ${Object.entries(STORIES).map(([sid,st])=>{
@@ -3251,7 +3447,6 @@ ${Object.entries(STORIES).map(([sid,st])=>{
   const dots=Array.from({length:st.endCount},(_,i)=>
     `<span style="color:${seen.includes(i+1)?'#ffd700':'rgba(255,255,255,0.25)'};font-size:0.75rem">●</span>`
   ).join('');
-  const hasProgress=Object.keys(seenEnds[sid]||{}).length>0;
   return `<div onclick="novelStart('${sid}')" style="background:rgba(255,255,255,0.14);border-radius:14px;padding:0.9rem 1rem;cursor:pointer;border:2px solid rgba(255,255,255,0.2);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)">
   <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.25rem">
     <span style="font-size:1.1rem">${st.emoji}</span>
@@ -3272,6 +3467,7 @@ window.novelMenu=novelMenu;
 function novelStart(sid){
   const story=STORIES[sid];if(!story)return;
   storyId=sid;
+  startNovelBGM(sid);
   try{
     const d=JSON.parse(localStorage.getItem('koala-novel2')||'{}');
     if(d.storyId===sid&&d.scene&&story.scenes[d.scene]) cur=d.scene;
@@ -3295,7 +3491,7 @@ function novelRender(){
   let bottom='';
   if(scene.c){
     bottom=`<div style="display:flex;flex-direction:column;gap:0.45rem;margin-top:0.65rem">
-${scene.c.map(ch=>`<button onclick="novelChoice('${ch.n}')" style="padding:0.65rem 0.9rem;border-radius:13px;border:2px solid rgba(255,255,255,0.5);background:rgba(255,255,255,0.16);color:white;cursor:pointer;font-family:inherit;font-size:0.88rem;text-align:left;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)">${ch.t}</button>`).join('')}
+${scene.c.map(ch=>`<button onclick="sfxNChoice();novelChoice('${ch.n}')" style="padding:0.65rem 0.9rem;border-radius:13px;border:2px solid rgba(255,255,255,0.5);background:rgba(255,255,255,0.16);color:white;cursor:pointer;font-family:inherit;font-size:0.88rem;text-align:left;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)">${ch.t}</button>`).join('')}
 </div>`;
   } else if(scene.e){
     const seen=seenEnds[storyId]||[];
@@ -3312,9 +3508,11 @@ ${scene.c.map(ch=>`<button onclick="novelChoice('${ch.n}')" style="padding:0.65r
   }
 
   el.style.background=BG[scene.bg]||BG.morning;
+  el.style.animation='nFadeIn .3s ease';
   el.innerHTML=`<div style="min-height:100vh;display:flex;flex-direction:column;padding:1rem;box-sizing:border-box">
-<div style="margin-bottom:0.3rem">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.3rem">
   <button onclick="novelMenu()" style="padding:0.18rem 0.55rem;border-radius:10px;border:1px solid rgba(255,255,255,0.35);background:rgba(0,0,0,0.22);color:rgba(255,255,255,0.7);font-size:0.62rem;cursor:pointer;font-family:inherit">← メニュー</button>
+  ${muteBtn()}
 </div>
 <div style="flex:1"></div>
 <div style="display:flex;align-items:flex-end;gap:0.8rem;margin-bottom:0.45rem">
@@ -3341,7 +3539,7 @@ function novelTap(){
   if(isTyping){
     clearInterval(typTimer);isTyping=false;
     const el=document.getElementById('novel-tb');if(el)el.textContent=fullTxt;
-  } else novelNext();
+  } else {sfxNTap();novelNext();}
 }
 
 function novelNext(){
