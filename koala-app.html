@@ -2971,12 +2971,21 @@ document.addEventListener('DOMContentLoaded', function(){
 'use strict';
 
 const CHARS={
-  'ナレーター':{img:null,              col:'#cccccc'},
+  'ナレーター':{img:null, col:'#dddddd'},
+  // 東山
   'もなか':   {img:'koala-images/もなか/higashiyama_2024.jpg',   col:'#d4a8ff'},
   'りん':     {img:'koala-images/りん/higashiyama_2024.JPG',     col:'#a8d4ff'},
-  'きらら':   {img:'koala-images/きらら/metro_2020.jpg',         col:'#ffd4a8'},
   'ししお':   {img:'koala-images/ししお/higashiyama_2023.jpg',   col:'#a8ffd4'},
+  // 多摩（東山にも登場）
+  'きらら':   {img:'koala-images/きらら/metro_2020.jpg',         col:'#ffd4a8'},
+  'きんとき': {img:'koala-images/きんとき/exblog_2023.jpg',     col:'#ffcc88'},
+  'あずま':   {img:'koala-images/あずま/prtimes_2024.jpg',       col:'#aaffcc'},
+  'タムタム': {img:'koala-images/タムタム/タムタム.png',         col:'#aaccff'},
+  // 金沢（東山にも登場）
   'たんぽぽ': {img:'koala-images/たんぽぽ/S__44449813.jpg',     col:'#ffa8d4'},
+  'ぼたん':   {img:'koala-images/ぼたん/kanazawa_2024.jpg',     col:'#ffaacc'},
+  'ポポロ':   {img:'koala-images/ポポロ/S__44449814.jpg',       col:'#ccffaa'},
+  'コロン':   {img:'koala-images/コロン/S__44449805.jpg',       col:'#ffaaaa'},
 };
 
 const BG={
@@ -2988,9 +2997,151 @@ const BG={
   end1:     'linear-gradient(180deg,#f9a825,#ff8f00)',
   end2:     'linear-gradient(180deg,#7b1fa2,#26c6da)',
   end3:     'linear-gradient(180deg,#00838f,#43a047)',
+  // 多摩
+  tama:     'linear-gradient(180deg,#1565c0,#4fc3f7)',
+  tama_eve: 'linear-gradient(180deg,#283593,#5c6bc0)',
+  tama_end: 'linear-gradient(180deg,#0d47a1,#1a237e)',
+  // 金沢
+  knz_aut:  'linear-gradient(180deg,#bf360c,#ff6f00)',
+  knz_dusk: 'linear-gradient(180deg,#4a148c,#880e4f)',
+  knz_end:  'linear-gradient(180deg,#212121,#37474f)',
+  knz_hope: 'linear-gradient(180deg,#004d40,#00695c)',
 };
 
-// n=次シーン  c=選択肢  e=エンド番号
+// ── ストーリー定義 ──────────────────────────────────────────
+// 東山ストーリーの旧 S オブジェクトは STORIES.higashiyama.scenes に統合
+const STORIES={
+  higashiyama:{
+    title:'ユーカリの約束', zoo:'東山動植物園', emoji:'🌿', bgCol:'#2d5a1b',
+    desc:'もなかとりんの、小さな誕生日の物語', endCount:3,
+    scenes:{
+      '0':{bg:'dawn',    ch:'ナレーター',t:'ある朝のこと。東山の森に、やわらかな光が差し込んだ。',n:'1'},
+      '1':{bg:'dawn',    ch:'もなか',   t:'ふぁ〜あ…（もなかは伸びをして、いつもの木の上へ向かった）',n:'2'},
+      '2':{bg:'morning', ch:'ナレーター',t:'そこにはいつも、りんの顔がある。でも今日はなんか…違う。',n:'3'},
+      '3':{bg:'morning', ch:'もなか',   t:'（あれ…りんちゃんがぼんやりしてる。珍しいな）',n:'4'},
+      '4':{bg:'morning', ch:'もなか',   t:'どうしようかな…',c:[{t:'声をかけてみる',n:'a5'},{t:'そっとしておく',n:'b20'}]},
+      'a5':{bg:'morning', ch:'もなか',  t:'りんちゃん、おはよう。なんか元気ないね？',n:'a6'},
+      'a6':{bg:'morning', ch:'りん',    t:'…おはよう、もなかちゃん。なんでもないよ。',n:'a7'},
+      'a7':{bg:'morning', ch:'もなか',  t:'（なんでもないって顔じゃないよ）…ほんとに？',n:'a8'},
+      'a8':{bg:'morning', ch:'りん',    t:'……実はね。',n:'a9'},
+      'a9':{bg:'morning', ch:'りん',    t:'大事な人の誕生日、すっかり忘れてたんだ。もうすぎちゃって。',n:'a10'},
+      'a10':{bg:'morning',ch:'もなか',  t:'えっ、誰の誕生日？',n:'a11'},
+      'a11':{bg:'morning',ch:'りん',    t:'…もなかちゃんの。',n:'a12'},
+      'a12':{bg:'morning',ch:'もなか',  t:'えっ…！　そうだったの？　全然知らなかった…',n:'a13'},
+      'a13':{bg:'morning',ch:'りん',    t:'ごめんね。ずっと気になってて、何もできなくて。',n:'a14'},
+      'a14':{bg:'morning',ch:'きらら',  t:'（ひょっこり現れて）なになに〜？　深刻な顔してる！',n:'a15'},
+      'a15':{bg:'morning',ch:'もなか',  t:'どうしようか…',c:[{t:'きらら に相談する',n:'a16'},{t:'りん と二人で考える',n:'a30'}]},
+      'a16':{bg:'morning',ch:'もなか',  t:'きらら、実はね──（事情を説明した）',n:'a17'},
+      'a17':{bg:'morning',ch:'きらら',  t:'なるほどなるほど〜！　それなら任せて！　絶対なんとかする！',n:'a18'},
+      'a18':{bg:'forest', ch:'ナレーター',t:'作戦会議が始まった。3匹がああでもないこうでもないと話していると…',n:'a19'},
+      'a19':{bg:'forest', ch:'ししお',  t:'（通りがかり）ほほう、なにやら賑やかじゃのう。',n:'a20'},
+      'a20':{bg:'forest', ch:'きらら',  t:'ししお先輩！　いいとこきた！　どうすればいいと思います？',n:'a21'},
+      'a21':{bg:'forest', ch:'ししお',  t:'大切なのは、気持ちをちゃんと伝えること。形よりも、心じゃよ。',n:'a22'},
+      'a22':{bg:'forest', ch:'りん',    t:'…ありがとう、ししおさん。',n:'a23'},
+      'a23':{bg:'evening',ch:'ナレーター',t:'翌朝。もなかが目覚めると、木の枝にユーカリの飾りが並んでいた。',n:'a24'},
+      'a24':{bg:'evening',ch:'もなか',  t:'これって…？',n:'a25'},
+      'a25':{bg:'evening',ch:'りん',    t:'遅くなったけど…ハッピーバースデー、もなかちゃん。',n:'a26'},
+      'a26':{bg:'evening',ch:'きらら',  t:'ハッピーバースデー〜！　ユーカリケーキ（もどき）もあるよ！',n:'a27'},
+      'a27':{bg:'evening',ch:'もなか',  t:'みんな…ありがとう。嬉しい。すごく嬉しいよ。',n:'a28'},
+      'a28':{bg:'evening',ch:'ししお',  t:'（遠くから）ふふ、よかったのう。',n:'a29'},
+      'a29':{bg:'end1',   ch:'ナレーター',t:'END 1「みんなのお祝い」\nその日の東山は、いつもより少しだけあたたかかった。',e:1},
+      'a30':{bg:'morning',ch:'もなか',  t:'きらら、ちょっとごめんね。',n:'a31'},
+      'a31':{bg:'morning',ch:'きらら',  t:'え〜！　気になる〜！（でもしぶしぶ去っていった）',n:'a32'},
+      'a32':{bg:'forest', ch:'もなか',  t:'りんちゃん、二人で少し話さない？',n:'a33'},
+      'a33':{bg:'forest', ch:'りん',    t:'…うん。',n:'a34'},
+      'a34':{bg:'forest', ch:'もなか',  t:'何もできてなくても、覚えてくれてたこと、それだけで嬉しいよ。',n:'a35'},
+      'a35':{bg:'forest', ch:'りん',    t:'でも…ちゃんとしたかったんだよ。もなかちゃんに、特別なことしたくて。',n:'a36'},
+      'a36':{bg:'forest', ch:'もなか',  t:'じゃあ、一緒に行こう。好きなユーカリ、探しに。',n:'a37'},
+      'a37':{bg:'forest', ch:'ナレーター',t:'二匹は森の奥へ、お気に入りの場所を目指して歩いた。',n:'a38'},
+      'a38':{bg:'forest', ch:'りん',    t:'（葉っぱを差し出して）これ、もなかちゃんが好きなやつでしょ。',n:'a39'},
+      'a39':{bg:'forest', ch:'もなか',  t:'覚えてくれてたんだ…。ありがとう、りんちゃん。',n:'a40'},
+      'a40':{bg:'forest', ch:'りん',    t:'遅くなったけど…誕生日、おめでとう。',n:'a41'},
+      'a41':{bg:'forest', ch:'ナレーター',t:'二匹は並んで、ゆっくりとユーカリを食べた。',n:'a42'},
+      'a42':{bg:'end2',   ch:'ナレーター',t:'END 2「ふたりの秘密」\n二匹だけが知る、ちいさなお祝い。',e:2},
+      'b20':{bg:'morning',  ch:'もなか',  t:'（…なんか気になるけど、そっとしておこう）',n:'b21'},
+      'b21':{bg:'afternoon',ch:'ナレーター',t:'お昼になっても、りんはぼんやりしたまま。',n:'b22'},
+      'b22':{bg:'afternoon',ch:'たんぽぽ',t:'あれ、りんちゃんどうしたんだろ…もなかちゃん知ってる？',n:'b23'},
+      'b23':{bg:'afternoon',ch:'もなか',  t:'（やっぱり、放っておけないな…）',n:'b24'},
+      'b24':{bg:'afternoon',ch:'もなか',  t:'どうしようか…',c:[{t:'今度こそ声をかける',n:'b25'},{t:'たんぽぽに任せる',n:'b35'}]},
+      'b25':{bg:'afternoon',ch:'もなか',  t:'りんちゃん…やっぱり気になって。',n:'b26'},
+      'b26':{bg:'afternoon',ch:'りん',    t:'もなかちゃん…。実は、もなかちゃんの誕生日、忘れてたの。',n:'b27'},
+      'b27':{bg:'afternoon',ch:'もなか',  t:'そっか…。でも、こうして気にかけてくれてるだけで、充分だよ。',n:'b28'},
+      'b28':{bg:'afternoon',ch:'りん',    t:'もなかちゃん…ありがとう。',n:'b29'},
+      'b29':{bg:'afternoon',ch:'たんぽぽ',t:'（走ってきて）二人とも〜！　一緒にユーカリ食べよ〜！',n:'b30'},
+      'b30':{bg:'evening',  ch:'もなか',  t:'うん！　行こう行こう！',n:'b31'},
+      'b31':{bg:'evening',  ch:'ナレーター',t:'その午後、3匹は仲良くユーカリを分け合った。',n:'b32'},
+      'b32':{bg:'evening',  ch:'りん',    t:'（小声で）ほんとに、ありがとね、もなかちゃん。',n:'b33'},
+      'b33':{bg:'end2',     ch:'ナレーター',t:'END 2「ふたりの秘密」\n遠回りしたけど、気持ちはちゃんと届いた。',e:2},
+      'b35':{bg:'afternoon',ch:'もなか',  t:'（たんぽぽなら、うまく話してくれるかも）',n:'b36'},
+      'b36':{bg:'afternoon',ch:'たんぽぽ',t:'りんちゃん〜？　ちょっといい？',n:'b37'},
+      'b37':{bg:'afternoon',ch:'りん',    t:'たんぽぽちゃん…うん。',n:'b38'},
+      'b38':{bg:'afternoon',ch:'たんぽぽ',t:'なんか悩んでる？　私でよければ聞くよ〜',n:'b39'},
+      'b39':{bg:'afternoon',ch:'ナレーター',t:'りんはたんぽぽに、気持ちを話し始めた。遠くから、もなかが優しく見守っていた。',n:'b40'},
+      'b40':{bg:'afternoon',ch:'りん',    t:'（もなかを見つけて）…もなかちゃんも、こっちきて。',n:'b41'},
+      'b41':{bg:'evening',  ch:'もなか',  t:'（え！　い、いいの？）',n:'b42'},
+      'b42':{bg:'evening',  ch:'たんぽぽ',t:'もなかちゃんがいないと始まらないよ〜！',n:'b43'},
+      'b43':{bg:'evening',  ch:'ナレーター',t:'3匹は夕暮れの木陰で、ゆっくりと話した。',n:'b44'},
+      'b44':{bg:'end3',     ch:'ナレーター',t:'END 3「たんぽぽと一緒に」\n気づけばそこに、あたたかい場所があった。',e:3},
+    }
+  },
+
+  tama:{
+    title:'きんときのいい午後', zoo:'多摩動物公園', emoji:'🐨', bgCol:'#1a3a6b',
+    desc:'特に何もない。それがいい。多摩のコアラたちの、のんびりな午後', endCount:1,
+    scenes:{
+      't0':{bg:'tama',    ch:'ナレーター',t:'多摩動物公園の、ある午後のこと。',n:'t1'},
+      't1':{bg:'tama',    ch:'きんとき', t:'（木の上で、ぼんやりユーカリをかじりながら）……',n:'t2'},
+      't2':{bg:'tama',    ch:'きらら',   t:'きんとき、何してるの？',n:'t3'},
+      't3':{bg:'tama',    ch:'きんとき', t:'食べてる。あと、空見てる。',n:'t4'},
+      't4':{bg:'tama',    ch:'きらら',   t:'（隣に来て、一緒に上を見る）そっかー。',n:'t5'},
+      't5':{bg:'tama',    ch:'きんとき', t:'今日の空、なんかいいね。',n:'t6'},
+      't6':{bg:'tama',    ch:'きらら',   t:'ほんとだ。ぽわっとしてる。',n:'t7'},
+      't7':{bg:'tama',    ch:'あずま',   t:'（通りかかって）何してるの？',n:'t8'},
+      't8':{bg:'tama',    ch:'きんとき', t:'空、見てる。',n:'t9'},
+      't9':{bg:'tama',    ch:'あずま',   t:'（一緒に見上げて）…あ、ほんとだ。なんかいいね。',n:'t10'},
+      't10':{bg:'tama',   ch:'ナレーター',t:'3匹はしばらく、空を見ていた。特に何もない、いつもの午後。',n:'t11'},
+      't11':{bg:'tama',   ch:'きんとき', t:'ユーカリ、おいしいな。',n:'t12'},
+      't12':{bg:'tama',   ch:'きらら',   t:'（くすっ）さっきも言ってたよ。',n:'t13'},
+      't13':{bg:'tama',   ch:'きんとき', t:'何回言ってもいいじゃん。おいしいんだから。',n:'t14'},
+      't14':{bg:'tama',   ch:'あずま',   t:'たしかに〜。',n:'t15'},
+      't15':{bg:'tama',   ch:'きらら',   t:'（のんびり）今日は風も気持ちいいしね。',n:'t16'},
+      't16':{bg:'tama',   ch:'きんとき', t:'うん。なんか今日、いい感じ。',n:'t17'},
+      't17':{bg:'tama',   ch:'あずま',   t:'特に何もないのに？',n:'t18'},
+      't18':{bg:'tama',   ch:'きんとき', t:'特に何もないのが、いい感じなんだよ。',n:'t19'},
+      't19':{bg:'tama',   ch:'ナレーター',t:'あずまは少し考えて、「そっか」とだけ言った。きららも、うん、と小さくうなずいた。',n:'t20'},
+      't20':{bg:'tama_eve',ch:'ナレーター',t:'多摩動物公園の午後は、ゆっくりと過ぎていった。それでよかった。',n:'t21'},
+      't21':{bg:'tama_end',ch:'ナレーター',t:'END「きんときのいい午後」\n\nきんとき 2022年6月25日生まれ🐨\n多摩動物公園で、今日もまったり過ごしてます。',e:1},
+    }
+  },
+
+  kanazawa:{
+    title:'ポポロのある朝', zoo:'金沢動物園', emoji:'🦘', bgCol:'#2a5c2a',
+    desc:'特別なことは何もない。でも、それだけでじゅうぶん', endCount:1,
+    scenes:{
+      'k0':{bg:'knz_hope',ch:'ナレーター',t:'金沢動物園の、ある朝のこと。',n:'k1'},
+      'k1':{bg:'morning', ch:'ポポロ',   t:'（ぱちっと目を開ける）',n:'k2'},
+      'k2':{bg:'morning', ch:'たんぽぽ', t:'おはよう、ポポロ。',n:'k3'},
+      'k3':{bg:'morning', ch:'ポポロ',   t:'ぽぽ…（まだ半分眠い）',n:'k4'},
+      'k4':{bg:'morning', ch:'コロン',   t:'（そばで葉っぱをかじりながら）起きたか。',n:'k5'},
+      'k5':{bg:'morning', ch:'ポポロ',   t:'（コロンが食べてるものを見て）それ、なに？',n:'k6'},
+      'k6':{bg:'morning', ch:'コロン',   t:'ユーカリ。食ってみるか？',n:'k7'},
+      'k7':{bg:'morning', ch:'ポポロ',   t:'（くんくん）…においする。',n:'k8'},
+      'k8':{bg:'morning', ch:'ポポロ',   t:'（ぺろ）……なんか、しゅわしゅわする。',n:'k9'},
+      'k9':{bg:'morning', ch:'たんぽぽ', t:'（くすっ）そっか。',n:'k10'},
+      'k10':{bg:'morning', ch:'ポポロ',  t:'（もぐもぐ）……（だんだんうとうと）',n:'k11'},
+      'k11':{bg:'morning', ch:'コロン',  t:'（静かに）すぐ寝るな。',n:'k12'},
+      'k12':{bg:'morning', ch:'たんぽぽ',t:'コアラだもん。',n:'k13'},
+      'k13':{bg:'morning', ch:'ナレーター',t:'ポポロは食べながら、そのまま眠った。たんぽぽとコロンは、隣でのんびりしていた。',n:'k14'},
+      'k14':{bg:'knz_hope',ch:'たんぽぽ',t:'今日もいい天気だね。',n:'k15'},
+      'k15':{bg:'knz_hope',ch:'コロン',  t:'ああ。',n:'k16'},
+      'k16':{bg:'knz_hope',ch:'ナレーター',t:'それだけで、じゅうぶんな朝だった。',n:'k17'},
+      'k17':{bg:'tama_end',ch:'ナレーター',t:'END「ポポロのある朝」\n\nポポロ 2024年4月生まれ🌸\n金沢動物園で、今日もすやすや。\n\nそれだけでじゅうぶん。',e:1},
+    }
+  },
+};
+
+// ── エンジン ──────────────────────────────────────────
+// 旧互換のダミー（使わない）
 const S={
   '0':{bg:'dawn',    ch:'ナレーター',t:'ある朝のこと。東山の森に、やわらかな光が差し込んだ。',n:'1'},
   '1':{bg:'dawn',    ch:'もなか',   t:'ふぁ〜あ…（もなかは伸びをして、いつもの木の上へ向かった）',n:'2'},
@@ -3071,56 +3222,106 @@ Object.entries(CHARS).forEach(([name,c])=>{
   if(c.img){const i=new Image();i.src='./'+c.img;IMGS[name]=i;}
 });
 
-let cur='0',typTimer=null,fullTxt='',isTyping=false,seenEnds=[];
+let storyId=null,cur=null,typTimer=null,fullTxt='',isTyping=false,seenEnds={};
 
 function initNovelGame(){
   const el=document.getElementById('novel-game');
   if(!el||el._init)return;el._init=true;
-  try{const d=JSON.parse(localStorage.getItem('koala-novel')||'{}');
-    cur=d.scene||'0';seenEnds=d.seenEnds||[];
+  try{
+    const d=JSON.parse(localStorage.getItem('koala-novel2')||'{}');
+    storyId=d.storyId||null; cur=d.scene||null; seenEnds=d.seenEnds||{};
   }catch(e){}
-  novelRender();
+  if(storyId&&cur&&STORIES[storyId]&&STORIES[storyId].scenes[cur]) novelRender();
+  else novelMenu();
 }
 window.initNovelGame=initNovelGame;
 
+function novelMenu(){
+  storyId=null;cur=null;
+  const el=document.getElementById('novel-game');if(!el)return;
+  el.style.background='linear-gradient(180deg,#1b5e20,#2e7d32)';
+  el.innerHTML=`<div style="min-height:100vh;padding:1.2rem;box-sizing:border-box;display:flex;flex-direction:column">
+<div style="text-align:center;color:white;margin-bottom:1.4rem;padding-top:0.5rem">
+  <div style="font-size:1.4rem;font-weight:700;text-shadow:0 2px 8px rgba(0,0,0,0.4)">📚 コアラのサウンドノベル</div>
+  <div style="font-size:0.7rem;opacity:0.75;margin-top:0.3rem">動物園のコアラたちの物語</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:0.8rem">
+${Object.entries(STORIES).map(([sid,st])=>{
+  const seen=seenEnds[sid]||[];
+  const dots=Array.from({length:st.endCount},(_,i)=>
+    `<span style="color:${seen.includes(i+1)?'#ffd700':'rgba(255,255,255,0.25)'};font-size:0.75rem">●</span>`
+  ).join('');
+  const hasProgress=Object.keys(seenEnds[sid]||{}).length>0;
+  return `<div onclick="novelStart('${sid}')" style="background:rgba(255,255,255,0.14);border-radius:14px;padding:0.9rem 1rem;cursor:pointer;border:2px solid rgba(255,255,255,0.2);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)">
+  <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.25rem">
+    <span style="font-size:1.1rem">${st.emoji}</span>
+    <span style="color:rgba(255,255,255,0.65);font-size:0.65rem">${st.zoo}</span>
+  </div>
+  <div style="color:white;font-weight:700;font-size:0.95rem;margin-bottom:0.2rem">「${st.title}」</div>
+  <div style="color:rgba(255,255,255,0.75);font-size:0.68rem;margin-bottom:0.35rem">${st.desc}</div>
+  <div style="display:flex;gap:0.2rem;align-items:center">${dots}
+    ${seen.length>0?`<span style="margin-left:0.35rem;font-size:0.58rem;color:rgba(255,255,255,0.5)">${seen.length}/${st.endCount} クリア</span>`:''}
+  </div>
+</div>`;
+}).join('')}
+</div>
+</div>`;
+}
+window.novelMenu=novelMenu;
+
+function novelStart(sid){
+  const story=STORIES[sid];if(!story)return;
+  storyId=sid;
+  try{
+    const d=JSON.parse(localStorage.getItem('koala-novel2')||'{}');
+    if(d.storyId===sid&&d.scene&&story.scenes[d.scene]) cur=d.scene;
+    else cur=Object.keys(story.scenes)[0];
+  }catch(e){cur=Object.keys(story.scenes)[0];}
+  novelRender();
+}
+window.novelStart=novelStart;
+
 function novelRender(){
-  const scene=S[cur];if(!scene)return;
+  const story=STORIES[storyId];if(!story)return;
+  const scene=story.scenes[cur];if(!scene)return;
   const el=document.getElementById('novel-game');if(!el)return;
   const char=CHARS[scene.ch]||CHARS['ナレーター'];
 
-  // キャラ画像
-  let portrait='';
   const img=IMGS[scene.ch];
-  if(img){
-    portrait=`<div style="width:88px;height:88px;border-radius:50%;overflow:hidden;border:3px solid ${char.col};box-shadow:0 3px 14px rgba(0,0,0,0.35);flex-shrink:0"><img src="${img.src}" style="width:100%;height:100%;object-fit:cover"></div>`;
-  } else {
-    portrait=`<div style="width:88px;height:88px;border-radius:50%;background:rgba(255,255,255,0.25);display:flex;align-items:center;justify-content:center;font-size:2.4rem;border:3px solid ${char.col};flex-shrink:0">🐨</div>`;
-  }
+  const portrait=img
+    ?`<div style="width:90px;height:90px;border-radius:50%;overflow:hidden;border:3px solid ${char.col};box-shadow:0 3px 16px rgba(0,0,0,0.4);flex-shrink:0"><img src="${img.src}" style="width:100%;height:100%;object-fit:cover"></div>`
+    :`<div style="width:90px;height:90px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:2.5rem;border:3px solid ${char.col};flex-shrink:0">🐨</div>`;
 
-  // 選択肢 or タップ促し
   let bottom='';
   if(scene.c){
-    bottom=`<div style="display:flex;flex-direction:column;gap:0.45rem;margin-top:0.6rem">
-${scene.c.map(ch=>`<button onclick="novelChoice('${ch.n}')" style="padding:0.65rem 0.9rem;border-radius:13px;border:2px solid rgba(255,255,255,0.55);background:rgba(255,255,255,0.18);color:white;cursor:pointer;font-family:inherit;font-size:0.88rem;text-align:left;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)">${ch.t}</button>`).join('')}
+    bottom=`<div style="display:flex;flex-direction:column;gap:0.45rem;margin-top:0.65rem">
+${scene.c.map(ch=>`<button onclick="novelChoice('${ch.n}')" style="padding:0.65rem 0.9rem;border-radius:13px;border:2px solid rgba(255,255,255,0.5);background:rgba(255,255,255,0.16);color:white;cursor:pointer;font-family:inherit;font-size:0.88rem;text-align:left;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)">${ch.t}</button>`).join('')}
 </div>`;
   } else if(scene.e){
-    const marks=[1,2,3].map(n=>seenEnds.includes(n)?'✅ END'+n:'⬜ END'+n).join('　');
-    bottom=`<div style="text-align:center;margin-top:1rem">
-<button onclick="novelRestart()" style="padding:0.5rem 1.2rem;border-radius:20px;border:none;background:white;color:#555;cursor:pointer;font-family:inherit;font-size:0.82rem">🔁 もう一度</button>
+    const seen=seenEnds[storyId]||[];
+    const dots=Array.from({length:story.endCount},(_,i)=>
+      `<span style="color:${seen.includes(i+1)?'#ffd700':'rgba(255,255,255,0.3)'};font-size:0.85rem">●</span>`
+    ).join('');
+    bottom=`<div style="text-align:center;margin-top:1rem;display:flex;gap:0.5rem;justify-content:center;flex-wrap:wrap">
+<button onclick="novelMenu()" style="padding:0.45rem 0.9rem;border-radius:20px;border:none;background:rgba(255,255,255,0.18);color:white;cursor:pointer;font-family:inherit;font-size:0.78rem">📚 メニュー</button>
+<button onclick="novelRestart()" style="padding:0.45rem 0.9rem;border-radius:20px;border:none;background:rgba(255,255,255,0.18);color:white;cursor:pointer;font-family:inherit;font-size:0.78rem">🔁 もう一度</button>
 </div>
-<div style="margin-top:0.6rem;font-size:0.68rem;color:rgba(255,255,255,0.75);text-align:center">${marks}</div>`;
+<div style="margin-top:0.5rem;text-align:center">${dots}</div>`;
   } else {
-    bottom=`<div onclick="novelTap()" style="text-align:center;margin-top:0.5rem;color:rgba(255,255,255,0.7);font-size:0.72rem;cursor:pointer;user-select:none">▼ タップして続ける</div>`;
+    bottom=`<div onclick="novelTap()" style="text-align:center;margin-top:0.5rem;color:rgba(255,255,255,0.65);font-size:0.7rem;cursor:pointer;user-select:none">▼ タップして続ける</div>`;
   }
 
   el.style.background=BG[scene.bg]||BG.morning;
   el.innerHTML=`<div style="min-height:100vh;display:flex;flex-direction:column;padding:1rem;box-sizing:border-box">
-<div style="flex:1"></div>
-<div style="display:flex;align-items:flex-end;gap:0.8rem;margin-bottom:0.5rem">
-${portrait}
-<div style="font-size:0.88rem;font-weight:700;color:white;text-shadow:0 1px 5px rgba(0,0,0,0.5)">${scene.ch==='ナレーター'?'':scene.ch}</div>
+<div style="margin-bottom:0.3rem">
+  <button onclick="novelMenu()" style="padding:0.18rem 0.55rem;border-radius:10px;border:1px solid rgba(255,255,255,0.35);background:rgba(0,0,0,0.22);color:rgba(255,255,255,0.7);font-size:0.62rem;cursor:pointer;font-family:inherit">← メニュー</button>
 </div>
-<div id="novel-tb" onclick="${scene.c||scene.e?'':'novelTap()'}" style="background:rgba(0,0,0,0.58);color:white;border-radius:14px;padding:1rem 1.1rem;font-size:0.92rem;line-height:1.75;min-height:90px;cursor:${scene.c||scene.e?'default':'pointer'};white-space:pre-wrap;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)"></div>
+<div style="flex:1"></div>
+<div style="display:flex;align-items:flex-end;gap:0.8rem;margin-bottom:0.45rem">
+${portrait}
+<div style="font-size:0.9rem;font-weight:700;color:white;text-shadow:0 1px 6px rgba(0,0,0,0.5)">${scene.ch==='ナレーター'?'':scene.ch}</div>
+</div>
+<div id="novel-tb" onclick="${scene.c||scene.e?'':'novelTap()'}" style="background:rgba(0,0,0,0.6);color:white;border-radius:14px;padding:1rem 1.1rem;font-size:0.9rem;line-height:1.8;min-height:88px;cursor:${scene.c||scene.e?'default':'pointer'};white-space:pre-wrap;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)"></div>
 ${bottom}
 </div>`;
   startTyping(scene.t);
@@ -3133,7 +3334,7 @@ function startTyping(text){
   typTimer=setInterval(()=>{
     if(i>=text.length){clearInterval(typTimer);isTyping=false;return;}
     el.textContent+=text[i++];
-  },38);
+  },36);
 }
 
 function novelTap(){
@@ -3144,17 +3345,28 @@ function novelTap(){
 }
 
 function novelNext(){
-  const scene=S[cur];if(!scene||scene.c||scene.e)return;
+  const story=STORIES[storyId];if(!story)return;
+  const scene=story.scenes[cur];if(!scene||scene.c||scene.e)return;
   cur=scene.n;novelSave();novelRender();
 }
 
 function novelChoice(next){cur=next;novelSave();novelRender();}
-function novelRestart(){cur='0';novelSave();novelRender();}
+
+function novelRestart(){
+  const story=STORIES[storyId];if(!story)return;
+  cur=Object.keys(story.scenes)[0];novelSave();novelRender();
+}
 
 function novelSave(){
-  const sc=S[cur];
-  if(sc&&sc.e&&!seenEnds.includes(sc.e)) seenEnds.push(sc.e);
-  try{localStorage.setItem('koala-novel',JSON.stringify({scene:cur,seenEnds}));}catch(e){}
+  const story=STORIES[storyId];
+  if(story){
+    const sc=story.scenes[cur];
+    if(sc&&sc.e){
+      if(!seenEnds[storyId]) seenEnds[storyId]=[];
+      if(!seenEnds[storyId].includes(sc.e)) seenEnds[storyId].push(sc.e);
+    }
+  }
+  try{localStorage.setItem('koala-novel2',JSON.stringify({storyId,scene:cur,seenEnds}));}catch(e){}
 }
 
 window.novelTap=novelTap;
