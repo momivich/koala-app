@@ -291,6 +291,7 @@ nav button.active{color:white;background:rgba(255,255,255,0.2);border-bottom:3px
   <button onclick="showTab('forest',this);if(window.initForestGame)initForestGame()">🌳 もり</button>
   <button onclick="showTab('oyr',this);if(window.initOyrGame)initOyrGame()">🃏 リレー</button>
   <button onclick="showTab('novel',this);if(window.initNovelGame)initNovelGame()">📖 ノベル</button>
+  <button onclick="showTab('shoot',this);if(window.initShootGame)initShootGame()">🍎 まもれ</button>
 </nav>
 
 <div id="tab-tree" class="tab active">
@@ -2876,6 +2877,14 @@ document.addEventListener('DOMContentLoaded', function(){
       ⭐ エース＝ 1 か 11 時間（自動で有利な方）<br>
       🎉 最初の2枚で21時間 ＝ <b>ぐっすり21</b>（1.5倍）
     </div>
+  </div>
+</div>
+
+<div id="tab-shoot" class="tab" style="padding:0.5rem;background:#0d2208;min-height:100%">
+  <div style="max-width:360px;margin:0 auto">
+    <div id="shoot-hud" style="margin-bottom:0.4rem"></div>
+    <canvas id="shoot-canvas" width="320" height="460"
+      style="display:block;width:100%;border-radius:10px;touch-action:manipulation;cursor:pointer"></canvas>
   </div>
 </div>
 
@@ -6811,6 +6820,236 @@ window.stopMemoryGame=function(){
 };
 })();
 </script>
+<!-- ===== コアラタワーディフェンス ===== -->
+<script>
+(function(){
+'use strict';
+let canvas,ctx,animId,lastTime=0;
+let gs='idle'; // idle|playing|wave_end|gameover|win
+let lives,money,score,waveIdx;
+let towers=[],enemies=[],bullets=[];
+let spawnQ=[],spawnT=0;
+const W=320,H=460;
+
+const PATH=[[160,15],[65,108],[255,198],[65,288],[255,375],[160,448]];
+const SEGS=[];let TLEN=0;
+for(let i=0;i<PATH.length-1;i++){
+  const[x1,y1]=PATH[i],[x2,y2]=PATH[i+1];
+  const dx=x2-x1,dy=y2-y1,len=Math.hypot(dx,dy);
+  SEGS.push({x1,y1,nx:dx/len,ny:dy/len,len,s:TLEN});TLEN+=len;
+}
+
+const SLOTS=[
+  [25,58],[110,58],[210,58],[292,58],
+  [25,153],[165,148],[295,153],
+  [25,243],[165,238],[295,243],
+  [25,333],[165,328],[295,333],
+  [85,413],[238,413]
+].map(([x,y])=>({x,y,tower:null}));
+
+// フルーツ＋さかな敵
+const ET={
+  apple: {hp:40, sp:75, sz:13, em:'🍎', rw:10},
+  orange:{hp:22, sp:145,sz:11, em:'🍊', rw:15},
+  grape: {hp:130,sp:42, sz:17, em:'🍇', rw:25},
+  fish:  {hp:55, sp:110,sz:13, em:'🐟', rw:18},
+  puffer:{hp:160,sp:35, sz:18, em:'🐡', rw:30},
+};
+
+const WAVES=[
+  [{t:'apple',n:8,iv:1.3}],
+  [{t:'apple',n:10,iv:1.1},{t:'orange',n:4,iv:0.9}],
+  [{t:'apple',n:10,iv:1.0},{t:'orange',n:6,iv:0.7},{t:'grape',n:2,iv:2.0}],
+  [{t:'orange',n:8,iv:0.8},{t:'fish',n:6,iv:1.0},{t:'grape',n:3,iv:1.5}],
+  [{t:'apple',n:10,iv:0.7},{t:'orange',n:8,iv:0.6},{t:'fish',n:6,iv:0.8},{t:'puffer',n:3,iv:2.0}],
+];
+
+const COST=30,RANGE=85,DMG=20,RATE=1.2;
+
+function init(){
+  canvas=document.getElementById('shoot-canvas');
+  if(!canvas||canvas._sh)return;
+  canvas._sh=true;
+  ctx=canvas.getContext('2d');
+  canvas.addEventListener('click',onClick);
+  canvas.addEventListener('touchend',e=>{
+    e.preventDefault();
+    const t=e.changedTouches[0];
+    onClick({clientX:t.clientX,clientY:t.clientY});
+  },{passive:false});
+  startGame();
+}
+
+function startGame(){
+  lives=10;money=150;score=0;waveIdx=0;
+  towers=[];enemies=[];bullets=[];spawnQ=[];
+  SLOTS.forEach(s=>s.tower=null);
+  gs='playing';startWave(0);
+  if(animId)cancelAnimationFrame(animId);
+  lastTime=0;animId=requestAnimationFrame(loop);
+  updateHUD();
+}
+
+function startWave(wi){
+  spawnQ=[];let t=2.0;
+  WAVES[wi].forEach(g=>{
+    for(let i=0;i<g.n;i++){spawnQ.push({t,type:g.t});t+=g.iv;}
+  });
+  spawnQ.sort((a,b)=>a.t-b.t);spawnT=0;
+}
+
+function loop(ts){
+  const dt=lastTime?Math.min((ts-lastTime)/1000,0.1):0.016;
+  lastTime=ts;update(dt);render();
+  animId=requestAnimationFrame(loop);
+}
+
+function update(dt){
+  if(gs!=='playing')return;
+  spawnT+=dt;
+  while(spawnQ.length&&spawnQ[0].t<=spawnT){
+    const s=spawnQ.shift(),e=ET[s.type];
+    enemies.push({type:s.type,hp:e.hp,mhp:e.hp,sp:e.sp,sz:e.sz,em:e.em,rw:e.rw,d:0,x:PATH[0][0],y:PATH[0][1],goal:false});
+  }
+  enemies.forEach(e=>{
+    e.d+=e.sp*dt;
+    if(e.d>=TLEN){e.goal=true;return;}
+    let r=e.d;
+    for(const sg of SEGS){if(r<=sg.len){e.x=sg.x1+sg.nx*r;e.y=sg.y1+sg.ny*r;return;}r-=sg.len;}
+  });
+  enemies=enemies.filter(e=>{
+    if(e.goal){lives--;updateHUD();return false;}
+    if(e.hp<=0){money+=e.rw;score+=e.rw;updateHUD();return false;}
+    return true;
+  });
+  towers.forEach(tw=>{
+    tw.cd=Math.max(0,(tw.cd||0)-dt);
+    if(tw.cd>0)return;
+    let tgt=null,bd=Infinity;
+    enemies.forEach(e=>{const d=Math.hypot(e.x-tw.x,e.y-tw.y);if(d<=RANGE&&d<bd){bd=d;tgt=e;}});
+    if(tgt){bullets.push({x:tw.x,y:tw.y,tgt,dmg:DMG,sp:230});tw.cd=1/RATE;tw.flash=0.15;}
+    if(tw.flash>0)tw.flash-=dt;
+  });
+  bullets=bullets.filter(b=>{
+    if(!b.tgt||b.tgt.hp<=0)return false;
+    const dx=b.tgt.x-b.x,dy=b.tgt.y-b.y,d=Math.hypot(dx,dy);
+    if(d<10){b.tgt.hp-=b.dmg;return false;}
+    b.x+=dx/d*b.sp*dt;b.y+=dy/d*b.sp*dt;return true;
+  });
+  if(spawnQ.length===0&&enemies.length===0){
+    waveIdx++;
+    gs=waveIdx>=WAVES.length?'win':'wave_end';
+  }
+  if(lives<=0)gs='gameover';
+}
+
+function render(){
+  ctx.clearRect(0,0,W,H);
+  // bg
+  ctx.fillStyle='#2a5c1b';ctx.fillRect(0,0,W,H);
+  // grass detail
+  ctx.fillStyle='#357520';
+  for(let i=0;i<20;i++){ctx.beginPath();ctx.arc((i*113+30)%W,((i*157+40)%H),10,0,Math.PI*2);ctx.fill();}
+  // path
+  ctx.lineCap='round';ctx.lineJoin='round';
+  [['rgba(0,0,0,0.25)',34],['#8c6830',30],['#a87c3a',24]].forEach(([c,w])=>{
+    ctx.strokeStyle=c;ctx.lineWidth=w;
+    ctx.beginPath();PATH.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke();
+  });
+  // start
+  ctx.font='16px serif';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('⚠️',PATH[0][0],PATH[0][1]);
+  // goal
+  const[gx,gy]=PATH[PATH.length-1];
+  ctx.fillStyle='rgba(255,250,200,0.92)';ctx.fillRect(gx-28,gy-18,56,32);
+  ctx.strokeStyle='#4a7c2f';ctx.lineWidth=2;ctx.strokeRect(gx-28,gy-18,56,32);
+  ctx.fillStyle='#2a5c1b';ctx.font='bold 9px sans-serif';ctx.fillText('コアラ館',gx,gy-4);
+  ctx.font='14px serif';ctx.fillText('🐨',gx,gy+10);
+  // slots
+  ctx.setLineDash([3,3]);
+  SLOTS.forEach(s=>{
+    if(!s.tower){
+      const canPlace=money>=COST;
+      ctx.strokeStyle=canPlace?'rgba(255,255,100,0.55)':'rgba(255,255,255,0.2)';
+      ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(s.x,s.y,18,0,Math.PI*2);ctx.stroke();
+      ctx.fillStyle=canPlace?'rgba(255,255,100,0.1)':'rgba(0,0,0,0.1)';ctx.fill();
+      if(canPlace){ctx.fillStyle='rgba(255,255,100,0.85)';ctx.font='bold 9px sans-serif';ctx.fillText('🌿',s.x,s.y+3);}
+    }
+  });
+  ctx.setLineDash([]);
+  // towers range + emoji
+  towers.forEach(tw=>{
+    ctx.strokeStyle='rgba(120,220,100,0.1)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.arc(tw.x,tw.y,RANGE,0,Math.PI*2);ctx.stroke();
+    const sc=tw.flash>0?1.35:1;
+    ctx.font=`${Math.round(22*sc)}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText('🐨',tw.x,tw.y);
+  });
+  // bullets
+  ctx.font='11px serif';ctx.textAlign='center';ctx.textBaseline='middle';
+  bullets.forEach(b=>ctx.fillText('🍃',b.x,b.y));
+  // enemies
+  enemies.forEach(e=>{
+    const bw=e.sz*2+4,bh=4,bx=e.x-bw/2,by=e.y-e.sz-8;
+    ctx.fillStyle='rgba(0,0,0,0.45)';ctx.fillRect(bx,by,bw,bh);
+    const r=e.hp/e.mhp;
+    ctx.fillStyle=r>0.5?'#4caf50':r>0.25?'#ff9800':'#f44336';
+    ctx.fillRect(bx,by,bw*r,bh);
+    ctx.font=`${e.sz*1.6}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(e.em,e.x,e.y);
+  });
+  ctx.textBaseline='alphabetic';
+  // overlays
+  if(gs==='wave_end'){
+    ctx.fillStyle='rgba(0,0,0,0.62)';ctx.fillRect(0,0,W,H);
+    ctx.textAlign='center';
+    ctx.fillStyle='#ffd700';ctx.font='bold 22px sans-serif';
+    ctx.fillText(`ウェーブ ${waveIdx} クリア 🎉`,W/2,H/2-18);
+    ctx.fillStyle='rgba(255,255,255,0.8)';ctx.font='14px sans-serif';
+    ctx.fillText(`次: ウェーブ ${waveIdx+1} / ${WAVES.length}`,W/2,H/2+16);
+    ctx.fillStyle='rgba(255,255,255,0.5)';ctx.font='12px sans-serif';
+    ctx.fillText('タップして続ける',W/2,H/2+44);
+  }
+  if(gs==='win'||gs==='gameover'){
+    ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(0,0,W,H);
+    ctx.textAlign='center';
+    ctx.font='34px serif';ctx.fillText(gs==='win'?'🎊':'😢',W/2,H/2-55);
+    ctx.fillStyle=gs==='win'?'#ffd700':'#ff7070';ctx.font='bold 20px sans-serif';
+    ctx.fillText(gs==='win'?'コアラ館を守りきった！':'コアラ館がやられた…',W/2,H/2-12);
+    ctx.fillStyle='#fff';ctx.font='15px sans-serif';
+    ctx.fillText(`スコア: ${score}コイン`,W/2,H/2+20);
+    ctx.fillStyle='#4a7c2f';ctx.beginPath();ctx.arc(W/2,H/2+65,34,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#fff';ctx.font='bold 13px sans-serif';ctx.fillText('もう一度',W/2,H/2+70);
+  }
+}
+
+function onClick(evt){
+  const rect=canvas.getBoundingClientRect(),sx=W/rect.width;
+  const mx=(evt.clientX-rect.left)*sx,my=(evt.clientY-rect.top)*sx;
+  if(gs==='wave_end'){startWave(waveIdx);gs='playing';return;}
+  if(gs==='win'||gs==='gameover'){
+    if(Math.hypot(mx-W/2,my-H/2-65)<34)startGame();return;
+  }
+  if(gs!=='playing')return;
+  SLOTS.forEach(s=>{
+    if(!s.tower&&Math.hypot(mx-s.x,my-s.y)<22&&money>=COST){
+      money-=COST;const tw={x:s.x,y:s.y,cd:0,flash:0};s.tower=tw;towers.push(tw);updateHUD();
+    }
+  });
+}
+
+function updateHUD(){
+  const el=document.getElementById('shoot-hud');if(!el)return;
+  el.innerHTML=`<div style="display:flex;justify-content:space-between;padding:0.35rem 0.7rem;background:#0a1a06;border-radius:8px;color:#c8f090;font-size:0.82rem;font-weight:bold;font-family:sans-serif">
+    <span>❤️ ${lives}</span><span>🌿 ${money}</span><span>🌊 W${waveIdx+1}/${WAVES.length}</span><span>⭐ ${score}</span>
+  </div>
+  <div style="text-align:center;color:#7aaa5a;font-size:0.7rem;margin-top:2px;font-family:sans-serif">🌿スロットをタップでコアラ配置（${COST}コイン）</div>`;
+}
+
+window.initShootGame=init;
+})();
+</script>
+
 <script>
 if('serviceWorker' in navigator){
   window.addEventListener('load', () => {
