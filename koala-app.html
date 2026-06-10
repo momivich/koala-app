@@ -15,15 +15,17 @@
 <title>日本のコアラ家族ポータル</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:#f5f0e8;color:#333;min-height:100vh}
-header{background:#2d5a1b;color:white;padding:1rem 1.5rem;display:flex;align-items:center;gap:1rem}
-header h1{font-size:1.3rem;font-weight:700}
-header .sub{font-size:0.8rem;opacity:0.8}
-nav{background:#4a7c2f;display:flex;flex-wrap:wrap}
-nav button{background:none;border:none;color:rgba(255,255,255,0.75);padding:0.8rem 1.5rem;font-size:0.9rem;cursor:pointer;font-family:inherit;transition:all 0.2s}
-nav button:hover{color:white;background:rgba(255,255,255,0.1)}
-nav button.active{color:white;background:rgba(255,255,255,0.2);border-bottom:3px solid #b5e853}
-.tab{display:none;padding:1.5rem}
+body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:#edf5e4;color:#222;min-height:100vh}
+header{background:linear-gradient(135deg,#1a3d0a 0%,#2d5a1b 55%,#3a7025 100%);color:white;padding:0.85rem 1.2rem;display:flex;align-items:center;gap:1rem;box-shadow:0 2px 8px rgba(0,0,0,0.25)}
+header h1{font-size:1.25rem;font-weight:700;letter-spacing:0.02em}
+header .sub{font-size:0.75rem;opacity:0.75;margin-top:1px}
+nav{background:linear-gradient(to bottom,#3a7025,#2d5a1b);display:flex;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;box-shadow:0 2px 6px rgba(0,0,0,0.2)}
+nav::-webkit-scrollbar{display:none}
+nav button{background:none;border:none;color:rgba(255,255,255,0.72);padding:0.72rem 1.1rem;font-size:0.82rem;cursor:pointer;font-family:inherit;transition:all 0.18s;white-space:nowrap;flex-shrink:0}
+nav button:hover{color:white;background:rgba(255,255,255,0.12)}
+nav button.active{color:white;background:rgba(255,255,255,0.18);border-bottom:3px solid #b5e853;font-weight:600}
+nav .nav-sep{width:1px;background:rgba(255,255,255,0.22);margin:0.45rem 0.15rem;flex-shrink:0}
+.tab{display:none;padding:1.2rem}
 .tab.active{display:block}
 
 /* 家系図 */
@@ -44,20 +46,21 @@ nav button.active{color:white;background:rgba(255,255,255,0.2);border-bottom:3px
 .fb:hover,.fb.on{background:#4a7c2f;color:white;border-color:#4a7c2f}
 .zoo-filters{display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.6rem;align-items:center}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:0.8rem}
-.card{background:white;border-radius:10px;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,0.07);cursor:pointer;transition:transform 0.18s,box-shadow 0.18s}
-.card:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(0,0,0,0.12)}
-.card.dead{opacity:0.6}
-.card-face{background:#e8f4d9;padding:0.8rem;display:flex;justify-content:center}
-.card-body{padding:0.7rem}
-.card-name{font-size:0.95rem;font-weight:700}
-.card-romaji{font-size:0.72rem;color:#888}
-.card-meta{font-size:0.78rem;color:#666;margin-top:0.3rem;line-height:1.6}
+.card{background:white;border-radius:14px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.09);cursor:pointer;transition:transform 0.18s,box-shadow 0.18s}
+.card:hover{transform:translateY(-3px);box-shadow:0 7px 22px rgba(0,0,0,0.14)}
+.card.dead{opacity:0.55}
+.card-face{background:linear-gradient(160deg,#cde8b0,#e2f2cc);padding:0;display:flex;justify-content:center;position:relative;overflow:hidden;min-height:110px;align-items:center}
+.card-face-zoo{position:absolute;bottom:0;left:0;right:0;background:rgba(20,60,5,0.52);color:rgba(255,255,255,0.92);font-size:0.62rem;padding:2px 6px;font-weight:600;letter-spacing:0.02em;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}
+.card-body{padding:0.75rem 0.8rem}
+.card-name{font-size:0.95rem;font-weight:700;color:#1a3d0a}
+.card-romaji{font-size:0.72rem;color:#999;margin-top:1px}
+.card-meta{font-size:0.78rem;color:#555;margin-top:0.35rem;line-height:1.7}
 .badge{display:inline-block;padding:1px 7px;border-radius:8px;font-size:0.68rem;font-weight:600;margin-left:3px}
 .bm{background:#dbeeff;color:#1a5c8a}.bf{background:#fde4ec;color:#8a2044}.bu{background:#eee;color:#555}
 .ba{background:#e8f5e9;color:#2e7d32}.bd{background:#f5f5f5;color:#757575}
 .bs{background:#fff3cd;color:#856404}
-.card-face img{width:100%;height:84px;object-fit:cover;display:block}
-.card-face svg{display:block;margin:auto}
+.card-face img{width:100%;height:110px;object-fit:cover;display:block}
+.card-face svg{display:block;margin:auto;padding:0.6rem}
 
 /* モーダル */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1000;padding:1rem}
@@ -278,20 +281,22 @@ nav button.active{color:white;background:rgba(255,255,255,0.2);border-bottom:3px
 <nav>
   <button class="active" onclick="showTab('tree',this)">🌿 家系図</button>
   <button onclick="showTab('zukan',this)">📖 図鑑</button>
+  <span class="nav-sep"></span>
   <button onclick="showTab('quiz',this)">🎮 クイズ</button>
   <button onclick="showTab('memory',this)">🃏 神経衰弱</button>
   <button onclick="showTab('oyako',this)">👨‍👩‍👧 親子クイズ</button>
   <button onclick="showTab('tower',this)">🌳 木登りタワー</button>
-  <button onclick="showTab('mattari',this)">🃏 まったり・パズル</button>
+  <button onclick="showTab('mattari',this)">🃏 まったり</button>
   <button onclick="showTab('dash',this);resizeDashFrame()">🏃 ダッシュ</button>
   <button onclick="showTab('suika',this);if(window.startSuikaGame)startSuikaGame()">🍉 スイカ</button>
   <button onclick="showTab('kioku',this);if(window.startMemoryGame)startMemoryGame()">🧠 記憶</button>
-  <button onclick="showTab('uta',this)">🎵 うた</button>
   <button onclick="showTab('bj',this)">💤 BJ</button>
   <button onclick="showTab('forest',this);if(window.initForestGame)initForestGame()">🌳 もり</button>
   <button onclick="showTab('oyr',this);if(window.initOyrGame)initOyrGame()">🃏 リレー</button>
-  <button onclick="showTab('novel',this);if(window.initNovelGame)initNovelGame()">📖 ノベル</button>
   <button onclick="showTab('shoot',this);if(window.initShootGame)initShootGame()">🍎 まもれ</button>
+  <span class="nav-sep"></span>
+  <button onclick="showTab('uta',this)">🎵 うた</button>
+  <button onclick="showTab('novel',this);if(window.initNovelGame)initNovelGame()">📖 ノベル</button>
 </nav>
 
 <div id="tab-tree" class="tab active">
@@ -1677,7 +1682,7 @@ function buildZukan(){
   document.getElementById('zukan-count').textContent = `${filtered.length}頭 表示中（全${KK.length}頭）`;
   grid.innerHTML = filtered.map(k=>`
     <div class="card ${k.alive?'':'dead'}" onclick="openModal(${k.id})">
-      <div class="card-face">${k.img?`<img src="${k.img}" alt="${k.name}" loading="lazy">`:koalaFace(k,84)}</div>
+      <div class="card-face">${k.img?`<img src="${k.img}" alt="${k.name}" loading="lazy">`:koalaFace(k,84)}<div class="card-face-zoo">${k.zoo}</div></div>
       <div class="card-body">
         <div class="card-name">${k.name}
           <span class="badge ${k.g==='m'?'bm':k.g==='f'?'bf':'bu'}">${k.g==='m'?'♂ オス':k.g==='f'?'♀ メス':'不明'}</span>
@@ -2881,10 +2886,30 @@ document.addEventListener('DOMContentLoaded', function(){
 </div>
 
 <div id="tab-shoot" class="tab" style="padding:0.5rem;background:#0d2208;min-height:100%">
-  <div style="max-width:360px;margin:0 auto">
+  <div style="max-width:360px;margin:0 auto;position:relative">
     <div id="shoot-hud" style="margin-bottom:0.4rem"></div>
     <canvas id="shoot-canvas" width="320" height="460"
       style="display:block;width:100%;border-radius:10px;touch-action:manipulation;cursor:pointer"></canvas>
+    <div id="shoot-tutorial" style="display:none;position:absolute;inset:0;background:rgba(5,20,3,0.88);border-radius:10px;padding:1.4rem 1.2rem;color:#e8f5d8;flex-direction:column;align-items:center;justify-content:center;gap:0.8rem;text-align:center;margin-top:2rem">
+      <div style="font-size:1.4rem;font-weight:800;letter-spacing:0.05em">🐨 まもれ！</div>
+      <div style="font-size:0.82rem;line-height:1.6;color:#c8e8b0">
+        フルーツや魚がコアラのおうちに向かってくる！<br>
+        コアラを配置して、みんなを守ろう🌿
+      </div>
+      <div style="background:rgba(255,255,255,0.07);border-radius:8px;padding:0.8rem;font-size:0.78rem;line-height:1.8;text-align:left;width:100%">
+        <div>🟩 <b>緑のマス</b>をタップ → コアラ配置（30💰）</div>
+        <div>🍎 りんご…遅い・頑丈</div>
+        <div>🍊 みかん…速い・弱い</div>
+        <div>🍇 ぶどう…とても遅い・超頑丈</div>
+        <div>🐟 魚…中速・中HP</div>
+        <div>🐡 ふぐ…遅い・超頑丈</div>
+      </div>
+      <div style="font-size:0.76rem;color:#90c070">ライフが0になるとゲームオーバー。<br>全5ウェーブをしのごう！</div>
+      <button onclick="document.getElementById('shoot-tutorial').style.display='none';localStorage.setItem('shoot-tut','1')"
+        style="margin-top:0.4rem;background:#4a9a20;color:white;border:none;border-radius:24px;padding:0.7rem 2.2rem;font-size:1rem;font-weight:700;cursor:pointer;letter-spacing:0.05em">
+        はじめる 🌿
+      </button>
+    </div>
   </div>
 </div>
 
@@ -3643,7 +3668,7 @@ function initNovelGame(){
   if(!document.getElementById('novel-anim-style')){
     const s=document.createElement('style');
     s.id='novel-anim-style';
-    s.textContent='@keyframes nFadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}';
+    s.textContent='@keyframes nFadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}@keyframes nStarFloat{0%{opacity:0;transform:translateY(0) scale(0.5)}30%{opacity:1}100%{opacity:0;transform:translateY(-120px) scale(1.2)}}@keyframes nStarSway{0%{margin-left:0}50%{margin-left:18px}100%{margin-left:0}}';
     document.head.appendChild(s);
   }
   try{
@@ -3779,6 +3804,34 @@ ${bottom}
 </div>
 </div>`;
   startTyping(scene.t);
+  if(scene.e) setTimeout(showEndParticles, 600);
+}
+
+function showEndParticles(){
+  const el=document.getElementById('novel-game');if(!el)return;
+  // 既存パーティクル削除
+  const old=document.getElementById('novel-end-particles');if(old)old.remove();
+  const layer=document.createElement('div');
+  layer.id='novel-end-particles';
+  layer.style.cssText='position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:10';
+  const EMOJIS=['🌿','✨','⭐','🌸','💫','🍃','🐨'];
+  const count=18;
+  for(let i=0;i<count;i++){
+    const span=document.createElement('span');
+    const em=EMOJIS[Math.floor(Math.random()*EMOJIS.length)];
+    const left=Math.random()*92+2;
+    const delay=Math.random()*2.4;
+    const dur=2.2+Math.random()*1.8;
+    const bottom=Math.random()*30;
+    const size=0.8+Math.random()*0.8;
+    span.textContent=em;
+    span.style.cssText=`position:absolute;left:${left}%;bottom:${bottom}%;font-size:${size}rem;animation:nStarFloat ${dur}s ${delay}s ease-out forwards, nStarSway ${dur*0.7}s ${delay}s ease-in-out infinite;will-change:transform,opacity`;
+    layer.appendChild(span);
+  }
+  // novel-gameは相対配置が必要
+  if(getComputedStyle(el).position==='static') el.style.position='relative';
+  el.appendChild(layer);
+  setTimeout(()=>{if(layer.parentNode)layer.remove();},6000);
 }
 
 function startTyping(text){
@@ -6878,6 +6931,11 @@ function init(){
     onClick({clientX:t.clientX,clientY:t.clientY});
   },{passive:false});
   startGame();
+  // チュートリアル：初回のみ表示
+  if(!localStorage.getItem('shoot-tut')){
+    const tut=document.getElementById('shoot-tutorial');
+    if(tut)tut.style.display='flex';
+  }
 }
 
 function startGame(){
