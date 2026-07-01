@@ -1,5 +1,5 @@
 // コアラアプリ Service Worker
-const CACHE = 'koala-app-v22';
+const CACHE = 'koala-app-v23';
 const PRECACHE = [
   "./koala-app.html",
   "./manifest.json",
