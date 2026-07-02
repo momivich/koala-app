@@ -544,10 +544,10 @@ const KK = [
    alive:true, imported:false, notable:false, img:'koala-images/ナギ/raditopi_2024.jpg',
    notes:'2023年7月31日淡路生まれ。ピーターとウミの息子。2024年4月に「ナギ（凪）」と命名。「波の立たない穏やかな一生を」との願いが込められている。'},
   // 東山 ── 現代の個体
-  {id:27, name:'スカイ', romaji:'Sky', g:'m', born:'2022', died:null, arriv:'2024',
-   zoo:'東山動植物園', origin:'タロンガ動物園（シドニー）', parents:[], children:[],
+  {id:27, name:'スカイ', romaji:'Sky', g:'m', born:'2022-04-20', died:null, arriv:'2024',
+   zoo:'東山動植物園', origin:'タロンガ動物園（シドニー）', parents:[], children:[83],
    alive:true, imported:true, notable:true, img:'koala-images/スカイ/S__44449796_0.jpg',
-   notes:'2024年10月25日、コアラ来園40周年を記念しタロンガ動物園（シドニー）より東山動植物園に来園した2歳のオス。'},
+   notes:'2022年4月20日タロンガ動物園（シドニー）生まれ。2024年10月25日、コアラ来園40周年を記念して東山動植物園に来園。りん（id:74）との間に2026年1月10日に初めての子（id:83）が誕生。'},
   {id:28, name:'もなか', romaji:'Monaka', g:'m', born:'2023', died:null, arriv:null,
    zoo:'東山動植物園', origin:'日本生まれ（東山）', parents:[77,74], children:[],
    alive:true, imported:false, notable:true, img:'koala-images/もなか/higashiyama_2024.jpg',
@@ -759,9 +759,9 @@ const KK = [
 
   // ── 東山動植物園 ── 現代個体グループ（クレメンツ家系外）──────────
   {id:74, name:'りん', romaji:'Rin', g:'f', born:'2017', died:null, arriv:null,
-   zoo:'東山動植物園', origin:'日本生まれ（東山）', parents:[], children:[64,78,28],
+   zoo:'東山動植物園', origin:'日本生まれ（東山）', parents:[], children:[64,78,28,83],
    alive:true, imported:false, notable:true, img:'koala-images/りん/higashiyama_2023.jpg',
-   notes:'2017年8月23日東山動植物園生まれ。イシン（id:77）との間につくし（2020年9月）を、タイチ（id:75）との間にだいふく（2022年3月）を、イシン（id:77）との間にもなか（2023年10月）を授かった。もなかはりんにとって3頭目の子。'},
+   notes:'2017年8月23日東山動植物園生まれ。イシン（id:77）との間につくし（2020年9月）を、タイチ（id:75）との間にだいふく（2022年3月）を、イシン（id:77）との間にもなか（2023年10月）を授かった。さらにスカイ（id:27）との間に4頭目（id:83）を2026年1月10日に出産。'},
   {id:75, name:'タイチ', romaji:'Taichi', g:'m', born:'2012', died:null, arriv:null,
    zoo:'平川動物公園（元：東山）', origin:'日本生まれ（東山）', parents:[], children:[53,46,78,29,45],
    alive:true, imported:false, notable:false, img:'koala-images/タイチ/higashiyama_2022.jpg',
@@ -800,6 +800,10 @@ const KK = [
    zoo:'平川動物公園（元：東山）', origin:'日本生まれ（東山）', parents:[77,13], children:[],
    alive:true, imported:false, notable:false, img:'koala-images/インディコ東山/higashiyama_2021.jpg',
    notes:'2019年12月東山動植物園生まれ。父はイシン（id:77）、母はティリー（id:13）。イシンにとって1頭目の子。コロナ禍のため公募なし、タロンガ動物園の提案によりアボリジニ語で「月」を意味する「インディコ」と命名（2020年8月発表）。東山で育育後、平川動物公園へ転出。なお、平川動物公園のインディコ（id:60）は別個体（同名）。'},
+  {id:83, name:'（名前未定）', romaji:'', g:'u', born:'2026-01-10', died:null, arriv:null,
+   zoo:'東山動植物園', origin:'日本生まれ（東山）', parents:[27,74], children:[],
+   alive:true, imported:false, notable:true, img:'https://www.higashiyama.city.nagoya.jp/news/archives/2026/06/239928ad51e6637fc142b981ad06ed5375390a3b.jpg',
+   notes:'2026年1月10日東山動植物園生まれ。父はスカイ（id:27）、母はりん（id:74）。りんにとって4頭目、スカイにとって初めての子。2026年7月2日に公式発表。性別は不明のため愛称投票は性別判明後に実施予定。'},
 ];
 
 function byId(id){return KK.find(k=>k.id===id)}
