@@ -577,17 +577,21 @@ const KK = [
 
   // ── 金沢動物園 ──────────────────────────────────
   {id:36, name:'コロン', romaji:'Koron', g:'m', born:'2014', died:null, arriv:null,
-   zoo:'金沢動物園', origin:'平川動物公園（鹿児島）', parents:[], children:[25,47,35],
+   zoo:'金沢動物園', origin:'平川動物公園（鹿児島）', parents:[], children:[25,47,35,84],
    alive:true, imported:false, notable:false, img:'koala-images/コロン/S__44449805.jpg',
-   notes:'2014年11月22日平川動物公園生まれ。父:フランク（平川#70♂・ドリームワールド出身）、母:ここア（平川#54♀）。多摩動物公園在籍時にこまち（東山出身）との間にあずま（2021年）、きらら（東山出身）との間にきんとき（2022年）を授かった。その後金沢動物園へ移り、たんぽぽとの間に2024年4月、ポポロを授かった。'},
+   notes:'2014年11月22日平川動物公園生まれ。父:フランク（平川#70♂・ドリームワールド出身）、母:ここア（平川#54♀）。多摩動物公園在籍時にこまち（東山出身）との間にあずま（2021年）、きらら（東山出身）との間にきんとき（2022年）を授かった。その後金沢動物園へ移り、たんぽぽとの間に2024年4月ポポロを、2025年12月には2頭目（id:84）を授かった。'},
   {id:34, name:'たんぽぽ', romaji:'Tanpopo', g:'f', born:'2020', died:null, arriv:null,
-   zoo:'金沢動物園', origin:'日本生まれ（金沢）', parents:[21], children:[35],
+   zoo:'金沢動物園', origin:'日本生まれ（金沢）', parents:[21], children:[35,84],
    alive:true, imported:false, notable:false, img:'koala-images/たんぽぽ/S__44449813.jpg',
-   notes:'2020年金沢動物園生まれ。母はぼたん（クレメンツ家系第5世代）。2024年にコロン（平川出身）との間にポポロを授かった。クレメンツ家系第6世代。'},
+   notes:'2020年4月26日金沢動物園生まれ。母はぼたん（クレメンツ家系第5世代）。コロン（平川出身）との間に2024年4月ポポロ（id:35）を、2025年12月に2頭目（id:84）を授かった。クレメンツ家系第6世代。'},
   {id:35, name:'ポポロ', romaji:'Poporo', g:'m', born:'2024', died:null, arriv:null,
    zoo:'金沢動物園', origin:'日本生まれ（金沢）', parents:[36,34], children:[],
    alive:true, imported:false, notable:true, img:'koala-images/ポポロ/S__44449814.jpg',
-   notes:'2024年4月金沢動物園生まれ。父コロン（平川出身）・母たんぽぽ（ぼたんの娘）の息子。名前は両親の名から「コ（ロン）＋タン（ポポ）→ポポロ」と命名（2025年2月公募）。2024年11月16日に袋から顔を出し公開。クレメンツ家系第7世代。'},
+   notes:'2024年4月金沢動物園生まれ。父コロン（平川出身）・母たんぽぽ（ぼたんの娘）の息子。名前は両親の名から「コ（ロン）＋タン（ポポ）→ポポロ」と命名（2025年2月公募）。2024年11月16日に袋から顔を出し公開。クレメンツ家系第7世代。妹/弟（id:84）が2025年12月に誕生。'},
+  {id:84, name:'（名前未定）', romaji:'', g:'u', born:'2025-12-01', died:null, arriv:null,
+   zoo:'金沢動物園', origin:'日本生まれ（金沢）', parents:[36,34], children:[],
+   alive:true, imported:false, notable:true, img:null,
+   notes:'2025年12月1日金沢動物園生まれ。父はコロン（id:36）、母はたんぽぽ（id:34）。たんぽぽにとって2頭目、コロンにとって4頭目の子。2026年6月15日に出袋確認。性別不明のため愛称投票は性別判明後に公式Xで実施予定。クレメンツ家系第7世代（ポポロの弟/妹）。'},
   {id:37, name:'ハリー', romaji:'Harry', g:'m', born:null, died:null, arriv:null,
    zoo:'金沢動物園', origin:'日本生まれ', parents:[], children:[],
    alive:true, imported:false, notable:false, img:'koala-images/ハリー/S__44449812.jpg',
@@ -1130,7 +1134,7 @@ function buildTamaTree(){
 // 金沢動物園 コアラ家系図
 // ============================================================
 function buildKanazawaTree(){
-  const W=920, H=570;
+  const W=960, H=570;
   let lines='', nodes='';
 
   const pos = {
@@ -1138,7 +1142,8 @@ function buildKanazawaTree(){
     49: [150, 300],  // ひなぎく（金沢生まれ, 没2025）
     34: [390, 300],  // たんぽぽ（金沢生まれ）
     36: [590, 300],  // コロン（外来: 平川→多摩→金沢）
-    35: [490, 470],  // ポポロ（金沢生まれ）
+    35: [400, 470],  // ポポロ（金沢生まれ）
+    84: [580, 470],  // 名前未定（コロン×たんぽぽ2頭目）
     37: [770, 190],  // ハリー（詳細調査中）
   };
 
@@ -1162,14 +1167,15 @@ function buildKanazawaTree(){
   lines += forkLine(pos[21][0], pos[21][1], pos[49][0], pos[49][1], pos[34][0], pos[34][1]);
   lines += `<text x="${(pos[21][0]+pos[34][0])/2+10}" y="${(pos[21][1]+pos[34][1])/2+2}" font-size="9" fill="#bbb">（父不明）</text>`;
 
-  // コロン × たんぽぽ → ポポロ
+  // コロン × たんぽぽ → ポポロ + id:84
   lines += coupleLine(pos[36][0], pos[36][1], pos[34][0], pos[34][1]);
-  lines += childLine((pos[36][0]+pos[34][0])/2, pos[36][1], pos[35][0], pos[35][1]);
+  lines += forkLine((pos[36][0]+pos[34][0])/2, pos[36][1], pos[35][0], pos[35][1], pos[84][0], pos[84][1]);
 
   // 補足ラベル
   lines += `<text x="${pos[21][0]}" y="${pos[21][1]-42}" text-anchor="middle" font-size="9" fill="#b06000" opacity="0.85">王子→金沢（転入後に繁殖）</text>`;
   lines += `<text x="${pos[36][0]}" y="${pos[36][1]-42}" text-anchor="middle" font-size="9" fill="#b06000" opacity="0.85">平川→多摩→金沢（外来）</text>`;
   lines += `<text x="${pos[37][0]}" y="${pos[37][1]+57}" text-anchor="middle" font-size="9" fill="#bbb">詳細調査中</text>`;
+  lines += `<text x="${pos[84][0]}" y="${pos[84][1]+44}" text-anchor="middle" font-size="9" fill="#e6a800">2025年12月誕生</text>`;
 
   // 背景
   const bgBand = `
@@ -1211,7 +1217,7 @@ function buildKanazawaTree(){
       ${bgBand}${lines}${nodes}
     </svg>`;
   document.getElementById('tree-note').textContent =
-    '📌 金沢動物園（横浜市）のコアラ家族。ぼたん（王子生まれ→金沢、2024没）がたんぽぽ（2020）とひなぎく（2021、2025没）を産んだ。コロン（平川→多摩→金沢の外来オス）×たんぽぽの間に2024年ポポロが誕生。ぼたんとコロンは点線リングが外来個体の印。ハリーは詳細調査中。各個体の詳細は図鑑タブで確認できます。';
+    '📌 金沢動物園（横浜市）のコアラ家族。ぼたん（王子生まれ→金沢、2024没）がたんぽぽ（2020）とひなぎく（2021、2025没）を産んだ。コロン（平川→多摩→金沢の外来オス）×たんぽぽの間に2024年4月ポポロ（id:35）が、2025年12月に2頭目（id:84、出袋2026年6月確認）が誕生。ぼたんとコロンは点線リングが外来個体の印。ハリーは詳細調査中。各個体の詳細は図鑑タブで確認できます。';
 }
 
 function buildSaitamaTree(){
@@ -1532,7 +1538,7 @@ function buildHirakawaTree(){
 // 東山動植物園 現代繁殖グループ（クレメンツ家系外）
 // ============================================================
 function buildHigashiyamaTree(){
-  const W=1020, H=440;
+  const W=1200, H=440;
   let lines='', nodes='';
 
   // ── 座標定義 ──────────────────────────────────────────────
@@ -1544,10 +1550,12 @@ function buildHigashiyamaTree(){
     74: [480, 130],  // りん（東山生まれ）
     77: [670, 130],  // イシン（平川→東山2018来）
     53: [860, 130],  // ななみ（東山生まれ・2025没）
+    27: [1080, 130], // スカイ（タロンガ来日2024）
     29: [195, 310],  // ししお（東山→平川2025転出）
     78: [385, 310],  // だいふく
     28: [575, 310],  // もなか
     79: [765, 310],  // おもち
+    83: [1080, 310], // 名前未定（りん×スカイ）
   };
 
   // ── 線描画ヘルパー ──
@@ -1584,22 +1592,29 @@ function buildHigashiyamaTree(){
   lines += coupleLine(pos[77][0], pos[77][1], pos[53][0], pos[53][1]);
   lines += childLine((pos[77][0]+pos[53][0])/2, pos[77][1], pos[79][0], pos[79][1]);
 
+  // りん × スカイ（アーク型） → id:83
+  lines += `<path d="M504,130 Q790,10 1056,130" fill="none" stroke="#c46a8a" stroke-width="1.8" stroke-dasharray="5,3" opacity="0.7"/>`;
+  lines += `<text x="785" y="64" text-anchor="middle" font-size="11" fill="#c46a8a" opacity="0.8">♥</text>`;
+  lines += childLine((pos[74][0]+pos[27][0])/2, pos[74][1], pos[83][0], pos[83][1]);
+
   // ── 補足ラベル ──
   lines += `<text x="${pos[75][0]}" y="${pos[75][1]-42}" text-anchor="middle" font-size="9" fill="#b06000">タロンガ来日2016年</text>`;
   lines += `<text x="${pos[75][0]}" y="${pos[75][1]-30}" text-anchor="middle" font-size="9" fill="#b06000">→平川2022転出</text>`;
   lines += `<text x="${pos[77][0]}" y="${pos[77][1]-42}" text-anchor="middle" font-size="9" fill="#4a7c2f">平川より2018来園</text>`;
   lines += `<text x="${pos[53][0]}" y="${pos[53][1]-30}" text-anchor="middle" font-size="9" fill="#aaa">2025年没</text>`;
   lines += `<text x="${pos[29][0]}" y="${pos[29][1]+44}" text-anchor="middle" font-size="9" fill="#b06000">→平川2025転出</text>`;
+  lines += `<text x="${pos[27][0]}" y="${pos[27][1]-42}" text-anchor="middle" font-size="9" fill="#b06000" opacity="0.85">タロンガより2024来園</text>`;
+  lines += `<text x="${pos[83][0]}" y="${pos[83][1]+46}" text-anchor="middle" font-size="9" fill="#e6a800">2026年1月誕生</text>`;
 
   // ── 現在東山在籍メモ (右下) ──
   lines += `<rect x="780" y="355" width="224" height="72" rx="6" fill="#e8f4d9" opacity="0.7"/>`;
   lines += `<text x="892" y="372" text-anchor="middle" font-size="10" fill="#4a7c2f" font-weight="700">現在東山在籍（参考）</text>`;
   lines += `<text x="792" y="388" font-size="9" fill="#555">りん・イシン・ホリー</text>`;
   lines += `<text x="792" y="402" font-size="9" fill="#555">だいふく・おもち・もなか</text>`;
-  lines += `<text x="792" y="416" font-size="9" fill="#555">スカイ（2024来日）・ティリー（2012来日）</text>`;
+  lines += `<text x="792" y="416" font-size="9" fill="#555">名前未定（id:83）・スカイ・ティリー</text>`;
 
   // ── ノード描画 ──
-  const outsiderIds = new Set([76, 75, 77]); // 来日・外来・他園転入
+  const outsiderIds = new Set([76, 75, 77, 27]); // 来日・外来・他園転入
   Object.entries(pos).forEach(([idStr, [x,y]]) => {
     const id = parseInt(idStr);
     const k = byId(id);
@@ -1627,7 +1642,7 @@ function buildHigashiyamaTree(){
       ${lines}${nodes}
     </svg>`;
   document.getElementById('tree-note').textContent =
-    '📌 東山動植物園の現代繁殖グループ（クレメンツ家系外）。ホリー（タロンガ来日2016年・点線）×タイチ→ししお、タイチ×りん→だいふく、りん×イシン（平川来2018年・点線）→もなか、イシン×ななみ→おもち。タイチは2022年平川へ・ししおは2025年平川へ転出済み。クレメンツ家系（クレメンツ/ティアラ/ピーター系）は「🌿 クレメンツ家系」タブを参照。';
+    '📌 東山動植物園の現代繁殖グループ（クレメンツ家系外）。ホリー（タロンガ来日2016年・点線）×タイチ→ししお、タイチ×りん→だいふく、りん×イシン（平川来2018年・点線）→もなか、イシン×ななみ→おもち、りん×スカイ（タロンガ来日2024年・点線）→名前未定（2026年1月）。タイチは2022年平川へ・ししおは2025年平川へ転出済み。クレメンツ家系（クレメンツ/ティアラ/ピーター系）は「🌿 クレメンツ家系」タブを参照。';
 }
 
 function switchTree(which, btn){
